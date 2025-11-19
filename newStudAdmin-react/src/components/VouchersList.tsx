@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { voucherService, productService, companyService } from '../services/api';
 import { Voucher } from '../types';
 import { Product, Company } from '../types';
+import Header from './Header';
 
 const VouchersList: React.FC = () => {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
@@ -78,15 +79,11 @@ const VouchersList: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">Liste des Promos (Vouchers)</h2>
-        <button
-          onClick={() => navigate('/create-voucher')}
-          className="bg-gray-900 text-white px-6 py-2 border font-medium hover:bg-gray-800"
-        >
-          + Créer une Promo
-        </button>
-      </div>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-800">Liste des Promos (Vouchers)</h2>
+        </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -98,10 +95,10 @@ const VouchersList: React.FC = () => {
         <div className="border p-12 text-center text-gray-500">
           <p className="mb-4">Aucune promo trouvée</p>
           <button
-            onClick={() => navigate('/create-voucher')}
+            onClick={() => navigate('/create-product')}
             className="text-gray-900 hover:underline font-semibold"
           >
-            Créer votre première promo
+            Créer un produit avec promo
           </button>
         </div>
       ) : (
@@ -188,6 +185,7 @@ const VouchersList: React.FC = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };

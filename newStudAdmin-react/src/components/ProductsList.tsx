@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productService } from '../services/api';
 import { Product } from '../types';
+import Header from './Header';
 
 const ProductsList: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ const ProductsList: React.FC = () => {
 
   return (
     <div>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Liste des Produits</h2>
         <button
@@ -100,22 +103,27 @@ const ProductsList: React.FC = () => {
                     </span>
                   )}
                 </div>
-                <div className="border-t pt-4 space-y-1">
-                  <div className="text-xs text-gray-500">ID: {product.id}</div>
-                  <div className="text-xs text-gray-500">
-                    Company ID: {product.data.companyId}
+                <div className="border-t pt-4 space-y-3">
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>ID: {product.id}</div>
+                    <div>Company ID: {product.data.companyId}</div>
+                    {product.data.category && (
+                      <div>Catégorie (type de produits): {product.data.category}</div>
+                    )}
                   </div>
-                  {product.data.category && (
-                    <div className="text-xs text-gray-500">
-                      Catégorie: {product.data.category}
-                    </div>
-                  )}
+                  <button
+                    onClick={() => navigate(`/edit-product/${product.id}`)}
+                    className="w-full border px-4 py-2 text-sm hover:bg-gray-50 mt-2"
+                  >
+                    Modifier
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };

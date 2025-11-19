@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { voucherService, productService, companyService } from '../services/api';
 import { UpdateVoucherData, Product, Company } from '../types';
+import Header from './Header';
 
 const EditVoucher: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -96,30 +97,33 @@ const EditVoucher: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center gap-4 mb-8">
+    <div>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => navigate('/vouchers')}
           className="text-primary-600 hover:text-primary-700 font-semibold"
         >
           ← Retour
         </button>
-        <h2 className="text-3xl font-bold text-gray-800">Modifier la Promo</h2>
-      </div>
+            <h2 className="text-3xl font-bold text-gray-800">Modifier la Promo</h2>
+          </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+              {error}
+            </div>
+          )}
 
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-          {success}
-        </div>
-      )}
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+              {success}
+            </div>
+          )}
 
-      <form onSubmit={handleSubmit} className="border p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="border p-6 space-y-6">
         <div>
           <label htmlFor="productId" className="block text-sm font-medium text-gray-700 mb-2">
             Produit *
@@ -236,8 +240,10 @@ const EditVoucher: React.FC = () => {
           >
             Annuler
           </button>
+          </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

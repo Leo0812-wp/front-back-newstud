@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { productService, companyService } from '../services/api';
+import { productService, companyService, voucherService } from '../services/api';
 import { CreateProductData, CreateCompanyData, Company } from '../types';
+import Header from './Header';
 
 type CompanySelectionMode = 'existing' | 'new';
 
@@ -12,7 +13,6 @@ const CreateProduct: React.FC = () => {
     description: '',
     category: '',
     companyId: '',
-    usable: 1,
     priceInit: '',
     priceFinal: '',
     promotion: '',
@@ -32,6 +32,21 @@ const CreateProduct: React.FC = () => {
   const [creatingCompany, setCreatingCompany] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // Champs pour la création de promo
+  const [promoData, setPromoData] = useState<{
+    activationTime: string;
+    desactivationTime: string;
+    dayOfWeek: string;
+    nbUtilisation: number;
+    nbVouchers: number;
+  }>({
+    activationTime: '',
+    desactivationTime: '',
+    dayOfWeek: '',
+    nbUtilisation: 1,
+    nbVouchers: 1,
+  });
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -52,7 +67,7 @@ const CreateProduct: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'usable' ? parseInt(value) || 1 : value,
+      [name]: value,
     }));
   };
 
@@ -106,6 +121,14 @@ const CreateProduct: React.FC = () => {
     }
   };
 
+  const handlePromoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setPromoData((prev) => ({
+      ...prev,
+      [name]: name === 'nbUtilisation' || name === 'nbVouchers' ? parseInt(value) || 1 : value,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -137,11 +160,64 @@ const CreateProduct: React.FC = () => {
       }
 
       // Créer le produit avec le bon companyId
-      await productService.create({
+      const productResponse = await productService.create({
         ...formData,
         companyId: finalCompanyId,
       });
-      setSuccess('Produit créé avec succès !');
+      
+      // Récupérer l'ID du produit créé
+      const productId = productResponse.data?.id || productResponse.data?.productId || productResponse.data?.data?.id;
+      
+      if (!productId) {
+        // Si l'ID n'est pas dans la réponse, recharger la liste et trouver le produit par son nom
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const productsRes = await productService.getAll();
+        const newProduct = productsRes.data.find(p => p.data.name === formData.name);
+        if (newProduct) {
+          // Créer le voucher si les champs promo sont remplis
+          if (promoData.activationTime && promoData.desactivationTime && promoData.dayOfWeek) {
+            try {
+              await voucherService.create({
+                productId: newProduct.id,
+                companyId: finalCompanyId,
+                activationTime: promoData.activationTime,
+                desactivationTime: promoData.desactivationTime,
+                dayOfWeek: promoData.dayOfWeek,
+                nbUtilisation: promoData.nbVouchers,
+              });
+              setSuccess('Produit et promo créés avec succès !');
+            } catch (voucherErr: any) {
+              setSuccess('Produit créé avec succès, mais erreur lors de la création de la promo');
+              console.error('Erreur création voucher:', voucherErr);
+            }
+          } else {
+            setSuccess('Produit créé avec succès !');
+          }
+        } else {
+          setSuccess('Produit créé avec succès !');
+        }
+      } else {
+        // Créer le voucher si les champs promo sont remplis
+        if (promoData.activationTime && promoData.desactivationTime && promoData.dayOfWeek) {
+          try {
+            await voucherService.create({
+              productId: productId,
+              companyId: finalCompanyId,
+              activationTime: promoData.activationTime,
+              desactivationTime: promoData.desactivationTime,
+              dayOfWeek: promoData.dayOfWeek,
+              nbUtilisation: promoData.nbVouchers,
+            });
+            setSuccess('Produit et promo créés avec succès !');
+          } catch (voucherErr: any) {
+            setSuccess('Produit créé avec succès, mais erreur lors de la création de la promo');
+            console.error('Erreur création voucher:', voucherErr);
+          }
+        } else {
+          setSuccess('Produit créé avec succès !');
+        }
+      }
+      
       setTimeout(() => {
         navigate('/products');
       }, 1500);
@@ -152,34 +228,53 @@ const CreateProduct: React.FC = () => {
     }
   };
 
+  const daysOfWeek = [
+    { value: 'lundi', label: 'Lundi' },
+    { value: 'mardi', label: 'Mardi' },
+    { value: 'mercredi', label: 'Mercredi' },
+    { value: 'jeudi', label: 'Jeudi' },
+    { value: 'vendredi', label: 'Vendredi' },
+    { value: 'samedi', label: 'Samedi' },
+    { value: 'dimanche', label: 'Dimanche' },
+  ];
+
+  const productCategories = [
+    { value: 'service', label: 'Service' },
+    { value: 'boissons', label: 'Boissons' },
+    { value: 'nourriture', label: 'Nourriture' },
+  ];
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={() => navigate('/products')}
-          className="text-gray-900 hover:underline font-semibold"
-        >
-          ← Retour
-        </button>
-        <h2 className="text-3xl font-bold">Créer un Produit</h2>
-      </div>
+    <div>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate('/products')}
+            className="text-gray-900 hover:underline font-semibold"
+          >
+            ← Retour
+          </button>
+            <h2 className="text-3xl font-bold">Créer un Produit</h2>
+          </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-6">
-          {error}
-        </div>
-      )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-6">
+              {error}
+            </div>
+          )}
 
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 mb-6">
-          {success}
-        </div>
-      )}
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 mb-6">
+              {success}
+            </div>
+          )}
 
-      <form onSubmit={handleSubmit} className="border p-6 space-y-6">
-        <div>
+          <form onSubmit={handleSubmit} className="border p-6 space-y-6">
+            <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-            Nom *
+            Nom (du produit) *
           </label>
           <input
             type="text"
@@ -194,7 +289,7 @@ const CreateProduct: React.FC = () => {
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Description *
+            Description du produit (vue coté utilisateur ) *
           </label>
           <textarea
             id="description"
@@ -209,17 +304,23 @@ const CreateProduct: React.FC = () => {
 
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-            Catégorie *
+            Catégorie (type de produits) *
           </label>
-          <input
-            type="text"
+          <select
             id="category"
             name="category"
             value={formData.category}
             onChange={handleChange}
             required
             className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-          />
+          >
+            <option value="">Sélectionner une catégorie</option>
+            {productCategories.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -369,22 +470,6 @@ const CreateProduct: React.FC = () => {
           )}
         </div>
 
-        <div>
-          <label htmlFor="usable" className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre d'utilisations par jour *
-          </label>
-          <input
-            type="number"
-            id="usable"
-            name="usable"
-            value={formData.usable}
-            onChange={handleChange}
-            required
-            min="1"
-            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-          />
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="priceInit" className="block text-sm font-medium text-gray-700 mb-2">
@@ -443,6 +528,110 @@ const CreateProduct: React.FC = () => {
           />
         </div>
 
+        {/* Section création de promo */}
+        <div className="border-t pt-6 mt-6">
+          <h3 className="font-semibold text-gray-700 mb-4">Paramètres de la promo</h3>
+
+          <div className="space-y-6 bg-gray-50 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="activationTime"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Heure d'activation * (HH:MM)
+                </label>
+                <input
+                  type="time"
+                  id="activationTime"
+                  name="activationTime"
+                  value={promoData.activationTime}
+                  onChange={handlePromoChange}
+                  required
+                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="desactivationTime"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Heure de désactivation * (HH:MM)
+                </label>
+                <input
+                  type="time"
+                  id="desactivationTime"
+                  name="desactivationTime"
+                  value={promoData.desactivationTime}
+                  onChange={handlePromoChange}
+                  required
+                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="dayOfWeek" className="block text-sm font-medium text-gray-700 mb-2">
+                Jour de la semaine *
+              </label>
+              <select
+                id="dayOfWeek"
+                name="dayOfWeek"
+                value={promoData.dayOfWeek}
+                onChange={handlePromoChange}
+                required
+                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+              >
+                <option value="">Sélectionner un jour</option>
+                {daysOfWeek.map((day) => (
+                  <option key={day.value} value={day.value}>
+                    {day.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="nbUtilisation"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Nombre d'utilisations*
+              </label>
+              <input
+                type="number"
+                id="nbUtilisation"
+                name="nbUtilisation"
+                value={promoData.nbUtilisation}
+                onChange={handlePromoChange}
+                required
+                min="1"
+                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="nbVouchers"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Nombre de vouchers à générer (max 3)
+              </label>
+              <input
+                type="number"
+                id="nbVouchers"
+                name="nbVouchers"
+                value={promoData.nbVouchers}
+                onChange={handlePromoChange}
+                min="1"
+                max="3"
+                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="flex gap-4">
           <button
             type="submit"
@@ -458,11 +647,12 @@ const CreateProduct: React.FC = () => {
           >
             Annuler
           </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
 
 export default CreateProduct;
-

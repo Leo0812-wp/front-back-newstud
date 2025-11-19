@@ -62,7 +62,7 @@ export interface CreateProductData {
   description: string;
   category: string;
   companyId: string;
-  usable: number;
+  usable?: number;
   priceInit?: string;
   priceFinal?: string;
   promotion?: string;

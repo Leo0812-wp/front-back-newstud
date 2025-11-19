@@ -203,7 +203,7 @@ const CreateVoucher: React.FC = () => {
             htmlFor="nbUtilisation"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Nombre d'utilisations *
+            Nombre d'utilisations sur l'offre*
           </label>
           <input
             type="number"
@@ -217,7 +217,7 @@ const CreateVoucher: React.FC = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
           <p className="mt-1 text-sm text-gray-500">
-            Nombre de vouchers à générer (max 3)
+            Nombre d'utilisation par jours (max 3)
           </p>
         </div>
 

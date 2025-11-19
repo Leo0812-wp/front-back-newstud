@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { companyService } from '../services/api';
 import { Company } from '../types';
+import Header from './Header';
 
 const CompaniesList: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ const CompaniesList: React.FC = () => {
 
   return (
     <div>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Liste des Entreprises</h2>
         <button
@@ -83,24 +86,29 @@ const CompaniesList: React.FC = () => {
                 <p className="text-gray-600 mb-4 text-sm line-clamp-3">
                   {company.data.description}
                 </p>
-                <div className="border-t pt-4 space-y-1">
-                  <div className="text-xs text-gray-500">ID: {company.id}</div>
-                  {company.data.place && (
-                    <div className="text-xs text-gray-500">
-                      {company.data.place}
-                    </div>
-                  )}
-                  {company.data.category && (
-                    <div className="text-xs text-gray-500">
-                      Catégorie: {company.data.category}
-                    </div>
-                  )}
+                <div className="border-t pt-4 space-y-3">
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>ID: {company.id}</div>
+                    {company.data.place && (
+                      <div>{company.data.place}</div>
+                    )}
+                    {company.data.category && (
+                      <div>Catégorie: {company.data.category}</div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => navigate(`/edit-company/${company.id}`)}
+                    className="w-full border px-4 py-2 text-sm hover:bg-gray-50 mt-2"
+                  >
+                    Modifier
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };
