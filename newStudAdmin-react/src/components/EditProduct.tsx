@@ -31,12 +31,14 @@ const EditProduct: React.FC = () => {
     dayOfWeek: string;
     nbUtilisation: number;
     nbVouchers: number;
+    isIndefinite: boolean;
   }>({
     activationTime: '',
     desactivationTime: '',
     dayOfWeek: '',
     nbUtilisation: 1,
     nbVouchers: 1,
+    isIndefinite: false,
   });
   const [existingVoucherId, setExistingVoucherId] = useState<string | null>(null);
 
@@ -70,12 +72,16 @@ const EditProduct: React.FC = () => {
           const voucherCount = (associatedVoucher.voucher1 ? 1 : 0) + 
                               (associatedVoucher.voucher2 ? 1 : 0) + 
                               (associatedVoucher.voucher3 ? 1 : 0);
+          const isIndefinite = associatedVoucher.desactivationTime === 'indefini' || 
+                               associatedVoucher.desactivationTime === 'manual' ||
+                               !associatedVoucher.desactivationTime;
           setPromoData({
             activationTime: associatedVoucher.activationTime || '',
-            desactivationTime: associatedVoucher.desactivationTime || '',
+            desactivationTime: isIndefinite ? '' : (associatedVoucher.desactivationTime || ''),
             dayOfWeek: associatedVoucher.dayOfWeek || '',
             nbUtilisation: 1,
             nbVouchers: voucherCount || 1,
+            isIndefinite: isIndefinite,
           });
           setExistingVoucherId(associatedVoucher.id);
         }
@@ -104,10 +110,20 @@ const EditProduct: React.FC = () => {
 
   const handlePromoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setPromoData((prev) => ({
-      ...prev,
-      [name]: name === 'nbUtilisation' || name === 'nbVouchers' ? parseInt(value) || 1 : value,
-    }));
+    const checked = (e.target as HTMLInputElement).checked;
+    
+    if (name === 'isIndefinite') {
+      setPromoData((prev) => ({
+        ...prev,
+        isIndefinite: checked,
+        desactivationTime: checked ? 'indefini' : '',
+      }));
+    } else {
+      setPromoData((prev) => ({
+        ...prev,
+        [name]: name === 'nbUtilisation' || name === 'nbVouchers' ? parseInt(value) || 1 : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,7 +137,7 @@ const EditProduct: React.FC = () => {
       await productService.update(id!, formData);
       
       // Gérer la promo
-      if (promoData.activationTime && promoData.desactivationTime && promoData.dayOfWeek) {
+      if (promoData.activationTime && (promoData.desactivationTime || promoData.isIndefinite) && promoData.dayOfWeek) {
         if (existingVoucherId) {
           // Mettre à jour la promo existante
           try {
@@ -129,7 +145,7 @@ const EditProduct: React.FC = () => {
               productId: id!,
               companyId: formData.companyId,
               activationTime: promoData.activationTime,
-              desactivationTime: promoData.desactivationTime,
+              desactivationTime: promoData.isIndefinite ? 'indefini' : promoData.desactivationTime,
               dayOfWeek: promoData.dayOfWeek,
             });
             setSuccess('Produit et promo modifiés avec succès !');
@@ -144,7 +160,7 @@ const EditProduct: React.FC = () => {
               productId: id!,
               companyId: formData.companyId,
               activationTime: promoData.activationTime,
-              desactivationTime: promoData.desactivationTime,
+              desactivationTime: promoData.isIndefinite ? 'indefini' : promoData.desactivationTime,
               dayOfWeek: promoData.dayOfWeek,
               nbUtilisation: promoData.nbVouchers,
             });
@@ -374,15 +390,31 @@ const EditProduct: React.FC = () => {
                     >
                       Heure de désactivation * (HH:MM)
                     </label>
-                    <input
-                      type="time"
-                      id="desactivationTime"
-                      name="desactivationTime"
-                      value={promoData.desactivationTime}
-                      onChange={handlePromoChange}
-                      required
-                      className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                    />
+                    <div className="space-y-2">
+                      <div className="flex items-center mb-2">
+                        <input
+                          type="checkbox"
+                          id="isIndefinite"
+                          name="isIndefinite"
+                          checked={promoData.isIndefinite}
+                          onChange={handlePromoChange}
+                          className="mr-2"
+                        />
+                        <label htmlFor="isIndefinite" className="text-sm text-gray-700">
+                          Indéfini (jusqu'à fin manuelle)
+                        </label>
+                      </div>
+                      <input
+                        type="time"
+                        id="desactivationTime"
+                        name="desactivationTime"
+                        value={promoData.isIndefinite ? '' : promoData.desactivationTime}
+                        onChange={handlePromoChange}
+                        required={!promoData.isIndefinite}
+                        disabled={promoData.isIndefinite}
+                        className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      />
+                    </div>
                   </div>
                 </div>
 

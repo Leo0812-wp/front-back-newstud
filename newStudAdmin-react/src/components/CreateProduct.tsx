@@ -40,12 +40,14 @@ const CreateProduct: React.FC = () => {
     dayOfWeek: string;
     nbUtilisation: number;
     nbVouchers: number;
+    isIndefinite: boolean;
   }>({
     activationTime: '',
     desactivationTime: '',
     dayOfWeek: '',
     nbUtilisation: 1,
     nbVouchers: 1,
+    isIndefinite: false,
   });
 
   useEffect(() => {
@@ -123,10 +125,20 @@ const CreateProduct: React.FC = () => {
 
   const handlePromoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setPromoData((prev) => ({
-      ...prev,
-      [name]: name === 'nbUtilisation' || name === 'nbVouchers' ? parseInt(value) || 1 : value,
-    }));
+    const checked = (e.target as HTMLInputElement).checked;
+    
+    if (name === 'isIndefinite') {
+      setPromoData((prev) => ({
+        ...prev,
+        isIndefinite: checked,
+        desactivationTime: checked ? 'indefini' : '',
+      }));
+    } else {
+      setPromoData((prev) => ({
+        ...prev,
+        [name]: name === 'nbUtilisation' || name === 'nbVouchers' ? parseInt(value) || 1 : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -175,13 +187,13 @@ const CreateProduct: React.FC = () => {
         const newProduct = productsRes.data.find(p => p.data.name === formData.name);
         if (newProduct) {
           // Créer le voucher si les champs promo sont remplis
-          if (promoData.activationTime && promoData.desactivationTime && promoData.dayOfWeek) {
+          if (promoData.activationTime && (promoData.desactivationTime || promoData.isIndefinite) && promoData.dayOfWeek) {
             try {
               await voucherService.create({
                 productId: newProduct.id,
                 companyId: finalCompanyId,
                 activationTime: promoData.activationTime,
-                desactivationTime: promoData.desactivationTime,
+                desactivationTime: promoData.isIndefinite ? 'indefini' : promoData.desactivationTime,
                 dayOfWeek: promoData.dayOfWeek,
                 nbUtilisation: promoData.nbVouchers,
               });
@@ -198,13 +210,13 @@ const CreateProduct: React.FC = () => {
         }
       } else {
         // Créer le voucher si les champs promo sont remplis
-        if (promoData.activationTime && promoData.desactivationTime && promoData.dayOfWeek) {
+        if (promoData.activationTime && (promoData.desactivationTime || promoData.isIndefinite) && promoData.dayOfWeek) {
           try {
             await voucherService.create({
               productId: productId,
               companyId: finalCompanyId,
               activationTime: promoData.activationTime,
-              desactivationTime: promoData.desactivationTime,
+              desactivationTime: promoData.isIndefinite ? 'indefini' : promoData.desactivationTime,
               dayOfWeek: promoData.dayOfWeek,
               nbUtilisation: promoData.nbVouchers,
             });
@@ -559,15 +571,33 @@ const CreateProduct: React.FC = () => {
                 >
                   Heure de désactivation * (HH:MM)
                 </label>
-                <input
-                  type="time"
-                  id="desactivationTime"
-                  name="desactivationTime"
-                  value={promoData.desactivationTime}
-                  onChange={handlePromoChange}
-                  required
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                />
+                
+                  <input
+                    type="time"
+                    id="desactivationTime"
+                    name="desactivationTime"
+                    value={promoData.isIndefinite ? '' : promoData.desactivationTime}
+                    onChange={handlePromoChange}
+                    required={!promoData.isIndefinite}
+                    disabled={promoData.isIndefinite}
+                    className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  />
+                  <div className="space-y-2">
+                  <div className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id="isIndefinite"
+                      name="isIndefinite"
+                      checked={promoData.isIndefinite}
+                      onChange={handlePromoChange}
+                      className="mr-2"
+                    />
+                    <label htmlFor="isIndefinite" className="text-sm text-gray-700">
+                      Indéfini (jusqu'à fin manuelle)
+                    </label>
+                  </div>
+                  
+                </div>
               </div>
             </div>
 
