@@ -32,6 +32,13 @@ const CreateProduct: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   
+const getCurrentTime = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
   // Champs pour la création de promo
   const [promoData, setPromoData] = useState<{
     activationTime: string;
@@ -41,7 +48,7 @@ const CreateProduct: React.FC = () => {
     nbVouchers: number;
     isIndefinite: boolean;
   }>({
-    activationTime: '',
+    activationTime: getCurrentTime(),
     desactivationTime: '',
     dayOfWeek: '',
     nbUtilisation: 1,
@@ -62,15 +69,89 @@ const CreateProduct: React.FC = () => {
     fetchCompanies();
   }, []);
 
-  const handleChange = (
+//   const handleChange = (
+//   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+// ) => {
+//   let { name, value } = e.target; // Note l'utilisation de 'let' ici
+
+//   const numericFields = ['promotion', 'priceInit', 'priceFinal'];
+
+//   if (numericFields.includes(name)) {
+//     // 1. Remplacer automatiquement la virgule par un point
+//     value = value.replace(',', '.');
+
+//     // 2. Valider avec le point uniquement (puisqu'on vient de remplacer la virgule)
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+//   }
+
+//   setFormData((prev) => ({
+//     ...prev,
+//     [name]: value,
+//   }));
+// };
+const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    let { name, value } = e.target;
+
+    // --- 1. VALIDATION REGEX (Code précédent) ---
+    const numericFields = ['promotion', 'priceInit', 'priceFinal'];
+    if (numericFields.includes(name)) {
+      value = value.replace(',', '.'); // On standardise
+      if (!/^\d*\.?\d*$/.test(value)) return;
+    }
+
+    // On prépare le nouvel état potentiel
+    let updatedFormData = { ...formData, [name]: value };
+
+    // --- 2. CALCULS AUTOMATIQUES ---
+    
+    // Fonction utilitaire pour convertir en nombre proprement (gère vide, undefined et string)
+    const parseNum = (val: string | undefined) => parseFloat(val || '0') || 0;
+
+    // A. Si on modifie la PROMOTION -> On calcule le PRIX FINAL
+    if (name === 'promotion') {
+      const initPrice = parseNum(formData.priceInit);
+      const promoVal = parseNum(value);
+
+      if (initPrice > 0) {
+        // Formule : PrixInit * (1 - Promo/100)
+        const newFinalPrice = initPrice * (1 - promoVal / 100);
+        // .toFixed(2) garde 2 décimales max, mais renvoie un string
+        updatedFormData.priceFinal = newFinalPrice.toFixed(2);
+      }
+    }
+
+    // B. Si on modifie le PRIX FINAL -> On calcule la PROMOTION
+    else if (name === 'priceFinal') {
+      const initPrice = parseNum(formData.priceInit);
+      const finalPrice = parseNum(value);
+
+      if (initPrice > 0) {
+        // Formule : ((PrixInit - PrixFinal) / PrixInit) * 100
+        const newPromo = ((initPrice - finalPrice) / initPrice) * 100;
+        // On arrondit la promo à 2 décimales max pour éviter "33.33333%"
+        updatedFormData.promotion = newPromo.toFixed(2);
+      }
+    }
+
+    // C. Si on modifie le PRIX INITIAL -> On met à jour le PRIX FINAL (en gardant la promo constante)
+    else if (name === 'priceInit') {
+      const initPrice = parseNum(value);
+      const currentPromo = parseNum(formData.promotion);
+
+      if (currentPromo > 0) {
+        const newFinalPrice = initPrice * (1 - currentPromo / 100);
+        updatedFormData.priceFinal = newFinalPrice.toFixed(2);
+      }
+    }
+
+    // --- 3. MISE À JOUR DE L'ÉTAT ---
+    setFormData(updatedFormData);
   };
+
 
   const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -162,6 +243,7 @@ const CreateProduct: React.FC = () => {
         // L'entreprise a déjà été créée, utiliser son ID
         finalCompanyId = formData.companyId;
       }
+   
 
       // Vérifier qu'on a bien un companyId
       if (!finalCompanyId) {
