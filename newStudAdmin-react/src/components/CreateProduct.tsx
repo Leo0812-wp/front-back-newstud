@@ -277,16 +277,16 @@ const handleChange = (
                 dayOfWeek: promoData.dayOfWeek,
                 nbUtilisation: promoData.nbVouchers,
               });
-              setSuccess('Produit et promo créés avec succès !');
+              setSuccess('Promo créée avec succès !');
             } catch (voucherErr: any) {
-              setSuccess('Produit créé avec succès, mais erreur lors de la création de la promo');
+              setSuccess('Promo créée avec succès, mais erreur lors de l’association de la promo');
               console.error('Erreur création voucher:', voucherErr);
             }
           } else {
-            setSuccess('Produit créé avec succès !');
+            setSuccess('Promo créée avec succès !');
           }
         } else {
-          setSuccess('Produit créé avec succès !');
+          setSuccess('Promo créée avec succès !');
         }
       } else {
         // Créer le voucher si les champs promo sont remplis
@@ -300,13 +300,13 @@ const handleChange = (
               dayOfWeek: promoData.dayOfWeek,
               nbUtilisation: promoData.nbVouchers,
             });
-            setSuccess('Produit et promo créés avec succès !');
+            setSuccess('Promo créée avec succès !');
           } catch (voucherErr: any) {
-            setSuccess('Produit créé avec succès, mais erreur lors de la création de la promo');
+            setSuccess('Promo créée avec succès, mais erreur lors de l’association de la promo');
             console.error('Erreur création voucher:', voucherErr);
           }
         } else {
-          setSuccess('Produit créé avec succès !');
+          setSuccess('Promo créée avec succès !');
         }
       }
       
@@ -314,7 +314,7 @@ const handleChange = (
         navigate('/products');
       }, 1500);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erreur lors de la création du produit');
+      setError(err.response?.data?.error || 'Erreur lors de la création de la promo');
     } finally {
       setLoading(false);
     }
@@ -347,7 +347,7 @@ const handleChange = (
           >
             ← Retour
           </button>
-            <h2 className="text-3xl font-bold">Créer un Produit</h2>
+            <h2 className="text-3xl font-bold">Créer une nouvelle promotion</h2>
           </div>
 
           {error && (
@@ -752,7 +752,7 @@ const handleChange = (
             disabled={loading}
             className="flex-1 bg-gray-900 text-white py-3 px-6 border font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Création en cours...' : 'Créer le Produit'}
+            {loading ? 'Création en cours...' : 'Créer la Promo'}
           </button>
           <button
             type="button"
