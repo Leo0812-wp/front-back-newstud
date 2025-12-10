@@ -15,6 +15,7 @@ const CreateProduct: React.FC = () => {
     priceInit: '',
     priceFinal: '',
     promotion: '',
+    usable: 1,
     urlImageCompanyPage: '',
     urlImageProductPage: [],
   });
@@ -174,6 +175,7 @@ const CreateProduct: React.FC = () => {
       const productResponse = await productService.create({
         ...formData,
         companyId: finalCompanyId,
+        usable: formData.usable || 1, // S'assurer que usable est un nombre
       });
       
       // Récupérer l'ID du produit créé
@@ -520,6 +522,28 @@ const CreateProduct: React.FC = () => {
             name="promotion"
             value={formData.promotion}
             onChange={handleChange}
+            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="usable" className="block text-sm font-medium text-gray-700 mb-2">
+            Nombre d'utilisations par jour *
+          </label>
+          <input
+            type="number"
+            id="usable"
+            name="usable"
+            value={formData.usable || 1}
+            onChange={(e) => {
+              const value = parseInt(e.target.value) || 1;
+              setFormData((prev) => ({
+                ...prev,
+                usable: value,
+              }));
+            }}
+            required
+            min="1"
             className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
           />
         </div>

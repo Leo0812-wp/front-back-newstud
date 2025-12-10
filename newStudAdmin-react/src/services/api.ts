@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Product, Company, CreateVoucherData, Voucher, UpdateVoucherData, CreateProductData, CreateCompanyData } from '../types';
+import { Product, Company, CreateVoucherData, Voucher, UpdateVoucherData, CreateProductData, CreateCompanyData, User } from '../types';
 import { authUtils } from '../utils/auth';
 
 // Détection automatique de l'URL du backend
@@ -24,31 +24,51 @@ const getApiBaseUrl = (): string => {
 const API_BASE_URL = getApiBaseUrl();
 const AUTH_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
 
-// Fonction pour récupérer le token (priorité: cookie/localStorage > variables d'environnement)
+// Fonction pour récupérer le token (priorité: variables d'environnement > cookie/localStorage)
 const getAuthToken = (): string | null => {
-  // D'abord, essayer depuis le cookie/localStorage
+  // D'abord, chercher dans les variables d'environnement (priorité pour faciliter le dev)
+  const envToken = import.meta.env.VITE_JWT_TOKEN || 
+                   import.meta.env.VITE_AUTH_TOKEN || 
+                   import.meta.env.VITE_TOKEN ||
+                   import.meta.env.JWT_TOKEN ||
+                   import.meta.env.AUTH_TOKEN;
+  
+  // Si on a un token dans .env, on le stocke automatiquement dans le localStorage
+  if (envToken && import.meta.env.DEV) {
+    const storedToken = authUtils.getToken();
+    if (!storedToken || storedToken !== envToken) {
+      authUtils.setToken(envToken);
+    }
+    return envToken;
+  }
+
+  // Sinon, essayer depuis le cookie/localStorage
   const tokenFromStorage = authUtils.getToken();
   if (tokenFromStorage) {
     return tokenFromStorage;
   }
 
-  // Sinon, chercher dans les variables d'environnement (fallback dev)
-  return (
-    import.meta.env.VITE_JWT_TOKEN || 
-    import.meta.env.VITE_AUTH_TOKEN || 
-    import.meta.env.VITE_TOKEN ||
-    import.meta.env.JWT_TOKEN ||
-    import.meta.env.AUTH_TOKEN ||
-    null
-  );
+  return null;
 };
 
 // Log en mode développement pour vérifier si le token est présent
 if (import.meta.env.DEV) {
   const token = getAuthToken();
-  if (token) {
+  // Vérifier si on a un token dans le .env (nécessite redémarrage du serveur)
+  const envToken = import.meta.env.VITE_JWT_TOKEN || 
+                   import.meta.env.VITE_AUTH_TOKEN || 
+                   import.meta.env.VITE_TOKEN;
+  
+  if (envToken) {
+    // Forcer l'utilisation du token du .env
+    authUtils.setToken(envToken);
+    console.log('✅ Token du .env détecté et appliqué');
+    console.log('   Le token du .env a priorité sur le localStorage');
+  } else if (token) {
     const source = authUtils.getToken() ? 'localStorage' : 'variables d\'environnement';
     console.log(`✅ Token d'authentification trouvé (${source})`);
+    console.warn('   ⚠️  Aucun token dans le .env détecté');
+    console.warn('   Si vous avez ajouté VITE_JWT_TOKEN dans .env, redémarrez le serveur (npm run dev)');
   } else {
     console.warn('⚠️  Aucun token d\'authentification trouvé');
     console.warn('   Vérifiez que VITE_JWT_TOKEN est défini dans votre fichier .env');
@@ -93,15 +113,35 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const token = getAuthToken();
+      const envToken = import.meta.env.VITE_JWT_TOKEN || 
+                       import.meta.env.VITE_AUTH_TOKEN || 
+                       import.meta.env.VITE_TOKEN;
+      
       console.error('❌ Erreur 401 - Non autorisé');
       console.error(`   Requête: ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
+      
       if (!token) {
         console.error('   ⚠️  Aucun token trouvé');
         console.error('   Vérifiez que VITE_JWT_TOKEN est défini dans votre fichier .env');
       } else {
         console.error('   ⚠️  Token présent mais invalide ou expiré');
-        console.error('   Utilisez le script: node scripts/generateToken.js dans le dossier backend');
-        console.error('   Puis redémarrez le serveur de développement (npm run dev)');
+        
+        // Si on a un token dans .env, on nettoie le localStorage et on utilise celui du .env
+        if (envToken) {
+          authUtils.removeToken();
+          authUtils.setToken(envToken);
+          console.error('   ✅ Token du .env appliqué automatiquement');
+          console.error('   ⚠️  Rechargez la page (F5) pour utiliser le nouveau token');
+          // On peut aussi essayer de relancer la requête automatiquement
+          // mais pour l'instant, on demande juste de recharger
+        } else {
+          console.error('   ⚠️  Aucun token valide trouvé dans le .env');
+          console.error('   📝 Étapes à suivre :');
+          console.error('   1. Exécutez: cd newStudBack-main && node scripts/generateToken.js');
+          console.error('   2. Copiez le token dans newStudAdmin-react/.env comme VITE_JWT_TOKEN=...');
+          console.error('   3. Redémarrez le serveur: npm run dev');
+          console.error('   4. Rechargez la page dans le navigateur');
+        }
       }
     }
     return Promise.reject(error);
@@ -156,6 +196,12 @@ export const db4Service = {
       totalCollections: number;
     }
   }> => api.get('/db4'),
+};
+
+// Services pour les utilisateurs/clients
+export const userService = {
+  getAll: (): Promise<{ data: User[] }> => api.get('/user'),
+  getById: (id: string): Promise<{ data: User }> => api.get(`/user/${id}`),
 };
 
 // Services d'authentification

@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProductsList from './components/ProductsList';
 import CompaniesList from './components/CompaniesList';
+import ClientsList from './components/ClientsList';
 import CreateProduct from './components/CreateProduct';
 import CreateCompany from './components/CreateCompany';
 import EditProduct from './components/EditProduct';
@@ -42,6 +43,15 @@ function App() {
               <RequireAuth>
                 <Header />
                 <CompaniesList />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/clients"
+            element={
+              <RequireAuth>
+                <Header />
+                <ClientsList />
               </RequireAuth>
             }
           />

@@ -53,6 +53,23 @@ const Header: React.FC = () => {
                 Entreprises
               </NavLink>
             </li>
+            <li>
+              <NavLink
+                to="/clients"
+                className={({ isActive }) =>
+                  `relative px-4 py-2 text-sm font-medium transition-colors duration-200
+                   ${isActive 
+                     ? 'text-[#D73738]' 
+                     : 'text-[#0C0C0C] hover:text-[#D73738]'
+                   }
+                   after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
+                   after:h-0.5 after:bg-[#D73738] after:transition-all after:duration-200
+                   ${isActive ? 'after:w-6' : 'after:w-0 hover:after:w-6'}`
+                }
+              >
+                Clients
+              </NavLink>
+            </li>
           </ul>
         </div>
 
