@@ -33,18 +33,25 @@ const CreateProduct: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   
+const getCurrentTime = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
   // Champs pour la création de promo
   const [promoData, setPromoData] = useState<{
     activationTime: string;
     desactivationTime: string;
-    dayOfWeek: string;
+    dayOfWeek: string[];
     nbUtilisation: number;
     nbVouchers: number;
     isIndefinite: boolean;
   }>({
-    activationTime: '',
+    activationTime: getCurrentTime(),
     desactivationTime: '',
-    dayOfWeek: '',
+    dayOfWeek: [],
     nbUtilisation: 1,
     nbVouchers: 1,
     isIndefinite: false,
@@ -63,15 +70,89 @@ const CreateProduct: React.FC = () => {
     fetchCompanies();
   }, []);
 
-  const handleChange = (
+//   const handleChange = (
+//   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+// ) => {
+//   let { name, value } = e.target; // Note l'utilisation de 'let' ici
+
+//   const numericFields = ['promotion', 'priceInit', 'priceFinal'];
+
+//   if (numericFields.includes(name)) {
+//     // 1. Remplacer automatiquement la virgule par un point
+//     value = value.replace(',', '.');
+
+//     // 2. Valider avec le point uniquement (puisqu'on vient de remplacer la virgule)
+//     if (!/^\d*\.?\d*$/.test(value)) {
+//       return;
+//     }
+//   }
+
+//   setFormData((prev) => ({
+//     ...prev,
+//     [name]: value,
+//   }));
+// };
+const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    let { name, value } = e.target;
+
+    // --- 1. VALIDATION REGEX (Code précédent) ---
+    const numericFields = ['promotion', 'priceInit', 'priceFinal'];
+    if (numericFields.includes(name)) {
+      value = value.replace(',', '.'); // On standardise
+      if (!/^\d*\.?\d*$/.test(value)) return;
+    }
+
+    // On prépare le nouvel état potentiel
+    let updatedFormData = { ...formData, [name]: value };
+
+    // --- 2. CALCULS AUTOMATIQUES ---
+    
+    // Fonction utilitaire pour convertir en nombre proprement (gère vide et string)
+    const parseNum = (val: string) => parseFloat(val) || 0;
+
+    // A. Si on modifie la PROMOTION -> On calcule le PRIX FINAL
+    if (name === 'promotion') {
+      const initPrice = parseNum(formData.priceInit);
+      const promoVal = parseNum(value);
+
+      if (initPrice > 0) {
+        // Formule : PrixInit * (1 - Promo/100)
+        const newFinalPrice = initPrice * (1 - promoVal / 100);
+        // .toFixed(2) garde 2 décimales max, mais renvoie un string
+        updatedFormData.priceFinal = newFinalPrice.toFixed(2);
+      }
+    }
+
+    // B. Si on modifie le PRIX FINAL -> On calcule la PROMOTION
+    else if (name === 'priceFinal') {
+      const initPrice = parseNum(formData.priceInit);
+      const finalPrice = parseNum(value);
+
+      if (initPrice > 0) {
+        // Formule : ((PrixInit - PrixFinal) / PrixInit) * 100
+        const newPromo = ((initPrice - finalPrice) / initPrice) * 100;
+        // On arrondit la promo à 2 décimales max pour éviter "33.33333%"
+        updatedFormData.promotion = newPromo.toFixed(2);
+      }
+    }
+
+    // C. Si on modifie le PRIX INITIAL -> On met à jour le PRIX FINAL (en gardant la promo constante)
+    else if (name === 'priceInit') {
+      const initPrice = parseNum(value);
+      const currentPromo = parseNum(formData.promotion);
+
+      if (currentPromo > 0) {
+        const newFinalPrice = initPrice * (1 - currentPromo / 100);
+        updatedFormData.priceFinal = newFinalPrice.toFixed(2);
+      }
+    }
+
+    // --- 3. MISE À JOUR DE L'ÉTAT ---
+    setFormData(updatedFormData);
   };
+
 
   const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -163,6 +244,7 @@ const CreateProduct: React.FC = () => {
         // L'entreprise a déjà été créée, utiliser son ID
         finalCompanyId = formData.companyId;
       }
+   
 
       // Vérifier qu'on a bien un companyId
       if (!finalCompanyId) {
@@ -239,6 +321,44 @@ const CreateProduct: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+   // Fonction pour ajouter/retirer un jour
+  const toggleDay = (dayValue: string) => {
+    setPromoData((prev) => {
+      const currentDays = prev.dayOfWeek;
+      // Si le jour est déjà là, on le retire, sinon on l'ajoute
+      const newDays = currentDays.includes(dayValue)
+        ? currentDays.filter((d) => d !== dayValue)
+        : [...currentDays, dayValue];
+      
+      return { ...prev, dayOfWeek: newDays };
+    });
+  };
+
+  // Fonction pour générer le texte affiché (ex: "Lundi, Week-end")
+  const getSelectedDaysLabel = () => {
+    const selected = promoData.dayOfWeek;
+    if (selected.length === 0) return 'Aucun jour sélectionné';
+    if (selected.length === 7) return 'Tous les jours';
+
+    const hasSaturday = selected.includes('samedi');
+    const hasSunday = selected.includes('dimanche');
+
+    // On prend tous les jours SAUF samedi et dimanche pour commencer
+    let labels = selected
+      .filter((d) => d !== 'samedi' && d !== 'dimanche')
+      .map((d) => d.charAt(0).toUpperCase() + d.slice(1)); // Capitalize (Lundi)
+
+    // Logique spéciale Week-end
+    if (hasSaturday && hasSunday) {
+      labels.push('Week-end');
+    } else {
+      if (hasSaturday) labels.push('Samedi');
+      if (hasSunday) labels.push('Dimanche');
+    }
+
+    return labels.join(', ');
   };
 
   const daysOfWeek = [
@@ -599,7 +719,15 @@ const CreateProduct: React.FC = () => {
                   className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                 />
               </div>
-
+            {/* Petit bouton pour rafraîchir l'heure */}
+                <button
+                  type="button"
+                  onClick={() => setPromoData(prev => ({ ...prev, activationTime: getCurrentTime() }))}
+                  className="px-3 py-2 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700"
+                  title="Mettre à l'heure actuelle"
+                >
+                  Maintenant
+                </button>
               <div>
                 <label
                   htmlFor="desactivationTime"
@@ -620,25 +748,36 @@ const CreateProduct: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <label htmlFor="dayOfWeek" className="block text-sm font-medium text-gray-700 mb-2">
-                Jour de la semaine *
+           <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jours de la semaine *
               </label>
-              <select
-                id="dayOfWeek"
-                name="dayOfWeek"
-                value={promoData.dayOfWeek}
-                onChange={handlePromoChange}
-                required
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              >
-                <option value="">Sélectionner un jour</option>
-                {daysOfWeek.map((day) => (
-                  <option key={day.value} value={day.value}>
-                    {day.label}
-                  </option>
-                ))}
-              </select>
+              
+              {/* Zone de sélection multi-boutons */}
+              <div className="flex flex-wrap gap-2 mb-2">
+                {daysOfWeek.map((day) => {
+                  const isSelected = promoData.dayOfWeek.includes(day.value);
+                  return (
+                    <button
+                      key={day.value}
+                      type="button" // Important : empêche le submit du formulaire
+                      onClick={() => toggleDay(day.value)}
+                      className={`px-3 py-2 text-sm rounded-md border transition-colors ${
+                        isSelected
+                          ? 'bg-gray-800 text-white border-gray-800 shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {day.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Affichage intelligent (ex: "Lundi, Week-end") */}
+              <div className="text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded border border-gray-200">
+                Sélection : <span className="font-medium text-gray-900">{getSelectedDaysLabel()}</span>
+              </div>
             </div>
 
             <div>
