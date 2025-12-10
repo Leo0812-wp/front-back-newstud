@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -14,4 +16,32 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Classes utilitaires personnalisées pour NewStud */
+@layer utilities {
+  .text-newstud-red {
+    color: #D73738;
+  }
+  
+  .bg-newstud-red {
+    background-color: #D73738;
+  }
+  
+  .border-newstud-red {
+    border-color: #D73738;
+  }
+  
+  .hover\:bg-newstud-red-dark:hover {
+    background-color: #c02f30;
+  }
+  
+  .newstud-shadow {
+    box-shadow: 0 0.5px 0 rgba(217, 217, 217, 0.5);
+  }
+  
+  .newstud-card {
+    border-radius: 20px;
+    box-shadow: 0 0.5px 0 rgba(217, 217, 217, 0.5);
+  }
 }
