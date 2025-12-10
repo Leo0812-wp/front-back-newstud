@@ -43,14 +43,14 @@ const getCurrentTime = () => {
   const [promoData, setPromoData] = useState<{
     activationTime: string;
     desactivationTime: string;
-    dayOfWeek: string;
+    dayOfWeek: string[];
     nbUtilisation: number;
     nbVouchers: number;
     isIndefinite: boolean;
   }>({
     activationTime: getCurrentTime(),
     desactivationTime: '',
-    dayOfWeek: '',
+    dayOfWeek: [],
     nbUtilisation: 1,
     nbVouchers: 1,
     isIndefinite: false,
@@ -243,6 +243,7 @@ const handleChange = (
         // L'entreprise a déjà été créée, utiliser son ID
         finalCompanyId = formData.companyId;
       }
+   
 
       // Vérifier qu'on a bien un companyId
       if (!finalCompanyId) {
@@ -318,6 +319,44 @@ const handleChange = (
     } finally {
       setLoading(false);
     }
+  };
+
+   // Fonction pour ajouter/retirer un jour
+  const toggleDay = (dayValue: string) => {
+    setPromoData((prev) => {
+      const currentDays = prev.dayOfWeek;
+      // Si le jour est déjà là, on le retire, sinon on l'ajoute
+      const newDays = currentDays.includes(dayValue)
+        ? currentDays.filter((d) => d !== dayValue)
+        : [...currentDays, dayValue];
+      
+      return { ...prev, dayOfWeek: newDays };
+    });
+  };
+
+  // Fonction pour générer le texte affiché (ex: "Lundi, Week-end")
+  const getSelectedDaysLabel = () => {
+    const selected = promoData.dayOfWeek;
+    if (selected.length === 0) return 'Aucun jour sélectionné';
+    if (selected.length === 7) return 'Tous les jours';
+
+    const hasSaturday = selected.includes('samedi');
+    const hasSunday = selected.includes('dimanche');
+
+    // On prend tous les jours SAUF samedi et dimanche pour commencer
+    let labels = selected
+      .filter((d) => d !== 'samedi' && d !== 'dimanche')
+      .map((d) => d.charAt(0).toUpperCase() + d.slice(1)); // Capitalize (Lundi)
+
+    // Logique spéciale Week-end
+    if (hasSaturday && hasSunday) {
+      labels.push('Week-end');
+    } else {
+      if (hasSaturday) labels.push('Samedi');
+      if (hasSunday) labels.push('Dimanche');
+    }
+
+    return labels.join(', ');
   };
 
   const daysOfWeek = [
@@ -656,15 +695,15 @@ const handleChange = (
                   className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                 />
               </div>
-{/* Petit bouton pour rafraîchir l'heure */}
-    <button
-      type="button"
-      onClick={() => setPromoData(prev => ({ ...prev, activationTime: getCurrentTime() }))}
-      className="px-3 py-2 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700"
-      title="Mettre à l'heure actuelle"
-    >
-      Maintenant
-    </button>
+            {/* Petit bouton pour rafraîchir l'heure */}
+                <button
+                  type="button"
+                  onClick={() => setPromoData(prev => ({ ...prev, activationTime: getCurrentTime() }))}
+                  className="px-3 py-2 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700"
+                  title="Mettre à l'heure actuelle"
+                >
+                  Maintenant
+                </button>
               <div>
                 <label
                   htmlFor="desactivationTime"
@@ -685,25 +724,36 @@ const handleChange = (
               </div>
             </div>
 
-            <div>
-              <label htmlFor="dayOfWeek" className="block text-sm font-medium text-gray-700 mb-2">
-                Jour de la semaine *
+           <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jours de la semaine *
               </label>
-              <select
-                id="dayOfWeek"
-                name="dayOfWeek"
-                value={promoData.dayOfWeek}
-                onChange={handlePromoChange}
-                required
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              >
-                <option value="">Sélectionner un jour</option>
-                {daysOfWeek.map((day) => (
-                  <option key={day.value} value={day.value}>
-                    {day.label}
-                  </option>
-                ))}
-              </select>
+              
+              {/* Zone de sélection multi-boutons */}
+              <div className="flex flex-wrap gap-2 mb-2">
+                {daysOfWeek.map((day) => {
+                  const isSelected = promoData.dayOfWeek.includes(day.value);
+                  return (
+                    <button
+                      key={day.value}
+                      type="button" // Important : empêche le submit du formulaire
+                      onClick={() => toggleDay(day.value)}
+                      className={`px-3 py-2 text-sm rounded-md border transition-colors ${
+                        isSelected
+                          ? 'bg-gray-800 text-white border-gray-800 shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {day.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Affichage intelligent (ex: "Lundi, Week-end") */}
+              <div className="text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded border border-gray-200">
+                Sélection : <span className="font-medium text-gray-900">{getSelectedDaysLabel()}</span>
+              </div>
             </div>
 
             <div>
