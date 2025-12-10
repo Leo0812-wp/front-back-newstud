@@ -2,14 +2,30 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const jwtSecret = process.env.JWT_SECRET;
 
+const getCookieToken = (cookieHeader) => {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(';').map((c) => c.trim());
+  const entry = cookies.find((c) => c.startsWith('newstud_admin_token='));
+  if (!entry) return null;
+  return decodeURIComponent(entry.split('=')[1]);
+};
+
 function verifyToken(req, res, next) {
-  const token = req.headers.authorization;
+  // Priorité au header Authorization, sinon cookie
+  let bearerToken = req.headers.authorization;
+  let token = null;
+
+  if (bearerToken && bearerToken.startsWith('Bearer ')) {
+    token = bearerToken.replace('Bearer ', '');
+  } else {
+    token = getCookieToken(req.headers.cookie);
+  }
 
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  jwt.verify(token.split('Bearer ')[1], jwtSecret, (err, decoded) => {
+  jwt.verify(token, jwtSecret, (err, decoded) => {
     if (err) {
       console.log('Erreur de vérification du token :', err);
       return res.status(401).json({ error: 'Invalid token' });

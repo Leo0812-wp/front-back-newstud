@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { companyService } from '../services/api';
 import { Company } from '../types';
-import Header from './Header';
 
 const CompaniesList: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +34,6 @@ const CompaniesList: React.FC = () => {
 
   return (
     <div>
-      <Header />
       <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Liste des Entreprises</h2>

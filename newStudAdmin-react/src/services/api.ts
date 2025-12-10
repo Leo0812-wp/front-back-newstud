@@ -22,16 +22,17 @@ const getApiBaseUrl = (): string => {
 };
 
 const API_BASE_URL = getApiBaseUrl();
+const AUTH_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
 
-// Fonction pour récupérer le token (priorité: localStorage > variables d'environnement)
+// Fonction pour récupérer le token (priorité: cookie/localStorage > variables d'environnement)
 const getAuthToken = (): string | null => {
-  // D'abord, essayer depuis localStorage
+  // D'abord, essayer depuis le cookie/localStorage
   const tokenFromStorage = authUtils.getToken();
   if (tokenFromStorage) {
     return tokenFromStorage;
   }
-  
-  // Sinon, chercher dans les variables d'environnement
+
+  // Sinon, chercher dans les variables d'environnement (fallback dev)
   return (
     import.meta.env.VITE_JWT_TOKEN || 
     import.meta.env.VITE_AUTH_TOKEN || 
@@ -57,6 +58,7 @@ if (import.meta.env.DEV) {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true, // permet d'envoyer les cookies (même en HTTP en dev)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -152,6 +154,25 @@ export const db4Service = {
       totalCollections: number;
     }
   }> => api.get('/db4'),
+};
+
+// Services d'authentification
+export const authService = {
+  login: async (credentials: { username: string; password: string }): Promise<{ token?: string }> => {
+    const { data } = await axios.post(
+      `${AUTH_BASE_URL}/auth/login`,
+      credentials,
+      { withCredentials: true }
+    );
+    // Si le backend renvoie le token (utile en dev HTTP), on le stocke aussi dans le cookie
+    if (data?.token) {
+      authUtils.setToken(data.token);
+    }
+    return data;
+  },
+  logout: (): void => {
+    authUtils.removeToken();
+  },
 };
 
 export default api;

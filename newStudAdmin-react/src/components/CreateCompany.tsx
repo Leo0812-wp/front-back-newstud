@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { companyService } from '../services/api';
 import { CreateCompanyData } from '../types';
-import Header from './Header';
 
 const CreateCompany: React.FC = () => {
   const navigate = useNavigate();
@@ -46,7 +45,6 @@ const CreateCompany: React.FC = () => {
 
   return (
     <div>
-      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-4 mb-8">

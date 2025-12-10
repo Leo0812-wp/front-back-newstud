@@ -41,12 +41,24 @@ collectionProduct.get().then(snapshot => {
 });
 const productController = new ProductController(collectionProduct);
 
-// Configuration CORS - Autoriser toutes les origines en développement
+// Configuration CORS pour autoriser le front local avec cookies
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
 app.use(cors({
-  origin: '*', // En développement, autoriser toutes les origines
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // requêtes locales (postman, curl)
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  credentials: false
+  credentials: true,
+  optionsSuccessStatus: 204,
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

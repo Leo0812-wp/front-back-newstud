@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { db4Service } from '../services/api';
-import Header from './Header';
 
 interface CollectionData {
   count: number;
@@ -70,7 +69,7 @@ const VueDB4: React.FC = () => {
   if (loading) {
     return (
       <div>
-        <Header />
+        
         <div className="container mx-auto px-4 py-12">
           <div className="text-center text-gray-600">Chargement des données Firebase...</div>
         </div>
@@ -81,7 +80,7 @@ const VueDB4: React.FC = () => {
   if (error) {
     return (
       <div>
-        <Header />
+        
         <div className="container mx-auto px-4 py-12">
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             {error}
@@ -94,7 +93,7 @@ const VueDB4: React.FC = () => {
   if (!data) {
     return (
       <div>
-        <Header />
+        
         <div className="container mx-auto px-4 py-12">
           <div className="text-center text-gray-500">Aucune donnée disponible</div>
         </div>
@@ -106,7 +105,7 @@ const VueDB4: React.FC = () => {
 
   return (
     <div>
-      <Header />
+      
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Vue DB4 - Base de données Firebase</h2>
