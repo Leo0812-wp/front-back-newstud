@@ -43,14 +43,14 @@ const getCurrentTime = () => {
   const [promoData, setPromoData] = useState<{
     activationTime: string;
     desactivationTime: string;
-    dayOfWeek: string[];
+    dayOfWeek: string;
     nbUtilisation: number;
     nbVouchers: number;
     isIndefinite: boolean;
   }>({
     activationTime: getCurrentTime(),
     desactivationTime: '',
-    dayOfWeek: [],
+    dayOfWeek: '',
     nbUtilisation: 1,
     nbVouchers: 1,
     isIndefinite: false,
@@ -108,8 +108,8 @@ const handleChange = (
 
     // --- 2. CALCULS AUTOMATIQUES ---
     
-    // Fonction utilitaire pour convertir en nombre proprement (gère vide et string)
-    const parseNum = (val: string) => parseFloat(val) || 0;
+    // Fonction utilitaire pour convertir en nombre proprement (gère vide, undefined et string)
+    const parseNum = (val: string | undefined) => parseFloat(val || '0') || 0;
 
     // A. Si on modifie la PROMOTION -> On calcule le PRIX FINAL
     if (name === 'promotion') {
@@ -321,44 +321,6 @@ const handleChange = (
     }
   };
 
-   // Fonction pour ajouter/retirer un jour
-  const toggleDay = (dayValue: string) => {
-    setPromoData((prev) => {
-      const currentDays = prev.dayOfWeek;
-      // Si le jour est déjà là, on le retire, sinon on l'ajoute
-      const newDays = currentDays.includes(dayValue)
-        ? currentDays.filter((d) => d !== dayValue)
-        : [...currentDays, dayValue];
-      
-      return { ...prev, dayOfWeek: newDays };
-    });
-  };
-
-  // Fonction pour générer le texte affiché (ex: "Lundi, Week-end")
-  const getSelectedDaysLabel = () => {
-    const selected = promoData.dayOfWeek;
-    if (selected.length === 0) return 'Aucun jour sélectionné';
-    if (selected.length === 7) return 'Tous les jours';
-
-    const hasSaturday = selected.includes('samedi');
-    const hasSunday = selected.includes('dimanche');
-
-    // On prend tous les jours SAUF samedi et dimanche pour commencer
-    let labels = selected
-      .filter((d) => d !== 'samedi' && d !== 'dimanche')
-      .map((d) => d.charAt(0).toUpperCase() + d.slice(1)); // Capitalize (Lundi)
-
-    // Logique spéciale Week-end
-    if (hasSaturday && hasSunday) {
-      labels.push('Week-end');
-    } else {
-      if (hasSaturday) labels.push('Samedi');
-      if (hasSunday) labels.push('Dimanche');
-    }
-
-    return labels.join(', ');
-  };
-
   const daysOfWeek = [
     { value: 'lundi', label: 'Lundi' },
     { value: 'mardi', label: 'Mardi' },
@@ -376,441 +338,383 @@ const handleChange = (
   ];
 
   return (
-    <div>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
+    <div className="bg-gray-100 min-h-screen py-10">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate('/products')}
-            className="text-gray-900 hover:underline font-semibold"
+            className="text-gray-900 font-semibold"
           >
             ← Retour
           </button>
-            <h2 className="text-3xl font-bold">Créer une nouvelle promotion</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Créer une nouvelle promotion</h2>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-6 rounded-xl">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-6">
-              {error}
-            </div>
-          )}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 mb-6 rounded-xl">
+            {success}
+          </div>
+        )}
 
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 mb-6">
-              {success}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="border p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-            Nom (du produit) *
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Description du produit (vue coté utilisateur ) *
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            rows={4}
-            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-            Catégorie (type de produits) *
-          </label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-          >
-            <option value="">Sélectionner une catégorie</option>
-            {productCategories.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Entreprise *
-          </label>
-          
-          {/* Sélection du mode */}
-          <div className="mb-4 flex gap-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="companyMode"
-                value="existing"
-                checked={companySelectionMode === 'existing'}
-                onChange={() => setCompanySelectionMode('existing')}
-                className="mr-2"
-              />
-              <span>Choisir une entreprise existante</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="companyMode"
-                value="new"
-                checked={companySelectionMode === 'new'}
-                onChange={() => setCompanySelectionMode('new')}
-                className="mr-2"
-              />
-              <span>Créer une nouvelle entreprise</span>
-            </label>
-          </div>
-
-          {/* Mode : Choisir une entreprise existante */}
-          {companySelectionMode === 'existing' && (
-            <select
-              id="companyId"
-              name="companyId"
-              value={formData.companyId}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-            >
-              <option value="">Sélectionner une entreprise</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.data.name} (ID: {company.id})
-                </option>
-              ))}
-            </select>
-          )}
-
-          {/* Mode : Créer une nouvelle entreprise */}
-          {companySelectionMode === 'new' && (
-            <div className="border p-4 space-y-4 bg-gray-50">
-              <h3 className="font-semibold text-gray-700 mb-3">Nouvelle entreprise</h3>
-              
-              <div>
-                <label htmlFor="newCompanyName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom de l'entreprise *
-                </label>
-                <input
-                  type="text"
-                  id="newCompanyName"
-                  name="name"
-                  value={newCompanyData.name}
-                  onChange={handleCompanyChange}
-                  required
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newCompanyDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  id="newCompanyDescription"
-                  name="description"
-                  value={newCompanyData.description}
-                  onChange={handleCompanyChange}
-                  required
-                  rows={3}
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newCompanyCategory" className="block text-sm font-medium text-gray-700 mb-2">
-                  Catégorie *
-                </label>
-                <input
-                  type="text"
-                  id="newCompanyCategory"
-                  name="category"
-                  value={newCompanyData.category}
-                  onChange={handleCompanyChange}
-                  required
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newCompanyPlace" className="block text-sm font-medium text-gray-700 mb-2">
-                  Lieu *
-                </label>
-                <input
-                  type="text"
-                  id="newCompanyPlace"
-                  name="place"
-                  value={newCompanyData.place}
-                  onChange={handleCompanyChange}
-                  required
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="newCompanyUrlImage" className="block text-sm font-medium text-gray-700 mb-2">
-                  URL Image
-                </label>
-                <input
-                  type="text"
-                  id="newCompanyUrlImage"
-                  name="urlImage"
-                  value={newCompanyData.urlImage}
-                  onChange={handleCompanyChange}
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                />
-              </div>
-
-              {formData.companyId && companySelectionMode === 'new' ? (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded text-sm">
-                  ✓ Entreprise créée ! Vous pouvez maintenant créer le produit.
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleCreateCompany}
-                  disabled={creatingCompany || !newCompanyData.name || !newCompanyData.description || !newCompanyData.category || !newCompanyData.place}
-                  className="w-full bg-blue-600 text-white py-2 px-4 font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {creatingCompany ? 'Création en cours...' : 'Créer l\'entreprise'}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="priceInit" className="block text-sm font-medium text-gray-700 mb-2">
-              Prix initial
-            </label>
-            <input
-              type="text"
-              id="priceInit"
-              name="priceInit"
-              value={formData.priceInit}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="priceFinal" className="block text-sm font-medium text-gray-700 mb-2">
-              Prix final
-            </label>
-            <input
-              type="text"
-              id="priceFinal"
-              name="priceFinal"
-              value={formData.priceFinal}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="promotion" className="block text-sm font-medium text-gray-700 mb-2">
-            Promotion (%)
-          </label>
-          <input
-            type="text"
-            id="promotion"
-            name="promotion"
-            value={formData.promotion}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="urlImageCompanyPage" className="block text-sm font-medium text-gray-700 mb-2">
-            URL Image (Page entreprise)
-          </label>
-          <input
-            type="text"
-            id="urlImageCompanyPage"
-            name="urlImageCompanyPage"
-            value={formData.urlImageCompanyPage}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-          />
-        </div>
-
-        {/* Section création de promo */}
-        <div className="border-t pt-6 mt-6">
-          <h3 className="font-semibold text-gray-700 mb-4">Paramètres de la promo</h3>
-
-          <div className="space-y-6 bg-gray-50 p-4">
-            <div className="flex items-center mb-4">
-              <input
-                type="checkbox"
-                id="isIndefinite"
-                name="isIndefinite"
-                checked={promoData.isIndefinite}
-                onChange={handlePromoChange}
-                className="mr-2"
-              />
-              <label htmlFor="isIndefinite" className="text-sm text-gray-700">
-                Indéfini (jusqu'à fin manuelle)
+              <label htmlFor="name" className="block text-sm font-bold text-gray-900 mb-3">
+                Nom (du produit) <span className="text-[#D73738]">*</span>
               </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-bold text-gray-900 mb-3">
+                Description du produit (vue côté utilisateur) <span className="text-[#D73738]">*</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+                rows={4}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="category" className="block text-sm font-bold text-gray-900 mb-3">
+                Catégorie (type de produits) <span className="text-[#D73738]">*</span>
+              </label>
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition cursor-pointer"
+              >
+                <option value="">Sélectionner une catégorie</option>
+                {productCategories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-900 mb-3">
+                Entreprise <span className="text-[#D73738]">*</span>
+              </label>
+
+              <div className="mb-4 flex gap-6">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="companyMode"
+                    value="existing"
+                    checked={companySelectionMode === 'existing'}
+                    onChange={() => setCompanySelectionMode('existing')}
+                    className="w-5 h-5 accent-[#D73738]"
+                  />
+                  <span className="text-gray-900">Choisir une entreprise existante</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="companyMode"
+                    value="new"
+                    checked={companySelectionMode === 'new'}
+                    onChange={() => setCompanySelectionMode('new')}
+                    className="w-5 h-5 accent-[#D73738]"
+                  />
+                  <span className="text-gray-900">Créer une nouvelle entreprise</span>
+                </label>
+              </div>
+
+              {companySelectionMode === 'existing' && (
+                <select
+                  id="companyId"
+                  name="companyId"
+                  value={formData.companyId}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                >
+                  <option value="">Sélectionner une entreprise</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.data.name} (ID: {company.id})
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {companySelectionMode === 'new' && (
+                <div className="mt-4 bg-gray-50 p-4 rounded-xl border-2 border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">Nouvelle entreprise</h3>
+
+                  <div>
+                    <label htmlFor="newCompanyName" className="block text-sm font-medium text-gray-900 mb-2">
+                      Nom de l'entreprise <span className="text-[#D73738]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="newCompanyName"
+                      name="name"
+                      value={newCompanyData.name}
+                      onChange={handleCompanyChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                    />
+                  </div>
+
+                  <div className="mt-4">
+                    <label htmlFor="newCompanyDescription" className="block text-sm font-medium text-gray-900 mb-2">
+                      Description <span className="text-[#D73738]">*</span>
+                    </label>
+                    <textarea
+                      id="newCompanyDescription"
+                      name="description"
+                      value={newCompanyData.description}
+                      onChange={handleCompanyChange}
+                      required
+                      rows={3}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                    />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="newCompanyCategory" className="block text-sm font-medium text-gray-900 mb-2">Catégorie <span className="text-[#D73738]">*</span></label>
+                      <input
+                        type="text"
+                        id="newCompanyCategory"
+                        name="category"
+                        value={newCompanyData.category}
+                        onChange={handleCompanyChange}
+                        required
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="newCompanyPlace" className="block text-sm font-medium text-gray-900 mb-2">Lieu <span className="text-[#D73738]">*</span></label>
+                      <input
+                        type="text"
+                        id="newCompanyPlace"
+                        name="place"
+                        value={newCompanyData.place}
+                        onChange={handleCompanyChange}
+                        required
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label htmlFor="newCompanyUrlImage" className="block text-sm font-medium text-gray-900 mb-2">URL Image</label>
+                    <input
+                      type="text"
+                      id="newCompanyUrlImage"
+                      name="urlImage"
+                      value={newCompanyData.urlImage}
+                      onChange={handleCompanyChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                    />
+                  </div>
+
+                  {formData.companyId && companySelectionMode === 'new' ? (
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded text-sm mt-4">
+                      ✓ Entreprise créée ! Vous pouvez maintenant créer le produit.
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleCreateCompany}
+                      disabled={creatingCompany || !newCompanyData.name || !newCompanyData.description || !newCompanyData.category || !newCompanyData.place}
+                      className="w-full bg-[#D73738] text-white py-3 px-4 font-bold rounded-xl mt-4 hover:bg-[#b82829] shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {creatingCompany ? 'Création en cours...' : 'Créer l\'entreprise'}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label
-                  htmlFor="activationTime"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Heure d'activation * (HH:MM)
-                </label>
+                <label htmlFor="priceInit" className="block text-sm font-medium text-gray-900 mb-3">Prix initial</label>
                 <input
-                  type="time"
-                  id="activationTime"
-                  name="activationTime"
-                  value={promoData.activationTime}
+                  type="text"
+                  id="priceInit"
+                  name="priceInit"
+                  value={formData.priceInit}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="priceFinal" className="block text-sm font-medium text-gray-900 mb-3">Prix final</label>
+                <input
+                  type="text"
+                  id="priceFinal"
+                  name="priceFinal"
+                  value={formData.priceFinal}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="promotion" className="block text-sm font-medium text-gray-900 mb-3">Promotion (%)</label>
+              <input
+                type="text"
+                id="promotion"
+                name="promotion"
+                value={formData.promotion}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="urlImageCompanyPage" className="block text-sm font-medium text-gray-900 mb-3">URL Image (Page entreprise)</label>
+              <input
+                type="text"
+                id="urlImageCompanyPage"
+                name="urlImageCompanyPage"
+                value={formData.urlImageCompanyPage}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+              />
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-900 mt-6 mb-4 pb-3 border-b border-gray-100">Paramètres de la promo</h3>
+
+            <div className="space-y-6 bg-gray-50 p-4 rounded-xl">
+              <div className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  id="isIndefinite"
+                  name="isIndefinite"
+                  checked={promoData.isIndefinite}
+                  onChange={handlePromoChange}
+                  className="w-5 h-5 accent-[#D73738] mr-3"
+                />
+                <label htmlFor="isIndefinite" className="text-sm text-gray-900">Indéfini (jusqu'à fin manuelle)</label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="activationTime" className="block text-sm font-medium text-gray-900 mb-2">Heure d'activation * (HH:MM)</label>
+                  <input
+                    type="time"
+                    id="activationTime"
+                    name="activationTime"
+                    value={promoData.activationTime}
+                    onChange={handlePromoChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="desactivationTime" className="block text-sm font-medium text-gray-900 mb-2">Heure de désactivation * (HH:MM)</label>
+                  <input
+                    type="time"
+                    id="desactivationTime"
+                    name="desactivationTime"
+                    value={promoData.isIndefinite ? '' : promoData.desactivationTime}
+                    onChange={handlePromoChange}
+                    required={!promoData.isIndefinite}
+                    disabled={promoData.isIndefinite}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="dayOfWeek" className="block text-sm font-medium text-gray-900 mb-2">Jour de la semaine <span className="text-[#D73738]">*</span></label>
+                <select
+                  id="dayOfWeek"
+                  name="dayOfWeek"
+                  value={promoData.dayOfWeek}
                   onChange={handlePromoChange}
                   required
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                />
-              </div>
-            {/* Petit bouton pour rafraîchir l'heure */}
-                <button
-                  type="button"
-                  onClick={() => setPromoData(prev => ({ ...prev, activationTime: getCurrentTime() }))}
-                  className="px-3 py-2 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700"
-                  title="Mettre à l'heure actuelle"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition cursor-pointer"
                 >
-                  Maintenant
-                </button>
-              <div>
-                <label
-                  htmlFor="desactivationTime"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Heure de désactivation * (HH:MM)
-                </label>
-                <input
-                  type="time"
-                  id="desactivationTime"
-                  name="desactivationTime"
-                  value={promoData.isIndefinite ? '' : promoData.desactivationTime}
-                  onChange={handlePromoChange}
-                  required={!promoData.isIndefinite}
-                  disabled={promoData.isIndefinite}
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-           <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Jours de la semaine *
-              </label>
-              
-              {/* Zone de sélection multi-boutons */}
-              <div className="flex flex-wrap gap-2 mb-2">
-                {daysOfWeek.map((day) => {
-                  const isSelected = promoData.dayOfWeek.includes(day.value);
-                  return (
-                    <button
-                      key={day.value}
-                      type="button" // Important : empêche le submit du formulaire
-                      onClick={() => toggleDay(day.value)}
-                      className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                        isSelected
-                          ? 'bg-gray-800 text-white border-gray-800 shadow-sm'
-                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
+                  <option value="">Sélectionner un jour</option>
+                  {daysOfWeek.map((day) => (
+                    <option key={day.value} value={day.value}>
                       {day.label}
-                    </button>
-                  );
-                })}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Affichage intelligent (ex: "Lundi, Week-end") */}
-              <div className="text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded border border-gray-200">
-                Sélection : <span className="font-medium text-gray-900">{getSelectedDaysLabel()}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="nbUtilisation" className="block text-sm font-medium text-gray-900 mb-2">Nombre d'utilisations <span className="text-[#D73738]">*</span></label>
+                  <input
+                    type="number"
+                    id="nbUtilisation"
+                    name="nbUtilisation"
+                    value={promoData.nbUtilisation}
+                    onChange={handlePromoChange}
+                    required
+                    min="1"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="nbVouchers" className="block text-sm font-medium text-gray-900 mb-2">Nombre de vouchers à générer (max 3)</label>
+                  <input
+                    type="number"
+                    id="nbVouchers"
+                    name="nbVouchers"
+                    value={promoData.nbVouchers}
+                    onChange={handlePromoChange}
+                    min="1"
+                    max="3"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
+                  />
+                </div>
               </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="nbUtilisation"
-                className="block text-sm font-medium text-gray-700 mb-2"
+            <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col md:flex-row gap-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-[#D73738] text-white py-4 px-6 font-bold rounded-xl hover:bg-[#b82829] shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Nombre d'utilisations*
-              </label>
-              <input
-                type="number"
-                id="nbUtilisation"
-                name="nbUtilisation"
-                value={promoData.nbUtilisation}
-                onChange={handlePromoChange}
-                required
-                min="1"
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              />
-            </div>
+                {loading ? 'Création en cours...' : 'Créer la Promo'}
+              </button>
 
-            <div>
-              <label
-                htmlFor="nbVouchers"
-                className="block text-sm font-medium text-gray-700 mb-2"
+              <button
+                type="button"
+                onClick={() => navigate('/products')}
+                className="px-6 py-4 border-2 border-gray-200 text-gray-700 font-bold rounded-xl bg-white hover:border-[#D73738] hover:text-[#D73738] hover:bg-red-50 transition"
               >
-                Nombre de vouchers à générer (max 3)
-              </label>
-              <input
-                type="number"
-                id="nbVouchers"
-                name="nbVouchers"
-                value={promoData.nbVouchers}
-                onChange={handlePromoChange}
-                min="1"
-                max="3"
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-gray-900 text-white py-3 px-6 border font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Création en cours...' : 'Créer la Promo'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/products')}
-            className="px-6 py-3 border text-gray-700 font-medium hover:bg-gray-50"
-          >
-            Annuler
-          </button>
+                Annuler
+              </button>
             </div>
           </form>
         </div>
