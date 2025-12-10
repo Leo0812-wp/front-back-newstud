@@ -19,38 +19,47 @@ class AuthController {
   }
 
   async login(req, res) {
-    try {
-      const { username, password } = req.body;
-      const user = await userAdmin.getUserByUid(username);
-  
-      if (!user) {
-        res.status(401).json({ error: 'User not authorized' });
-        return;
-      }
-      const storedPassword = user.password;
-      const passwordMatch = await bcrypt.compare(password, storedPassword);
-  
-      if (!passwordMatch) {
-        res.status(401).json({ error: 'Incorrect password' });
-        return;
-      }
-  
-      const token = jwt.sign({ username }, jwtSecret, { expiresIn: '1h' });
+  try {
+    const { username, password, rememberMe } = req.body; 
 
-      // Cookie accessible en HTTP (dev), SameSite Lax, pas Secure pour localhost
-      res.cookie('newstud_admin_token', token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        path: '/',
-      });
+    const user = await userAdmin.getUserByUid(username);
 
-      res.json({ token });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    if (!user) {
+      res.status(401).json({ error: 'User not authorized' });
+      return;
     }
+
+    const storedPassword = user.password;
+    const passwordMatch = await bcrypt.compare(password, storedPassword);
+
+    if (!passwordMatch) {
+      res.status(401).json({ error: 'Incorrect password' });
+      return;
+    }
+
+    const tokenDuration = rememberMe ? "30d" : "1h";
+
+    const token = jwt.sign({ username }, jwtSecret, { expiresIn: tokenDuration });
+
+    
+    const cookieMaxAge = rememberMe
+      ? 30 * 24 * 60 * 60 * 1000   
+      : 60 * 60 * 1000;            
+
+    res.cookie("newstud_admin_token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: cookieMaxAge,
+      path: "/",
+    });
+
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+}
+
 
 }
 
