@@ -21,7 +21,7 @@ const Header: React.FC = () => {
                 `px-4 py-3 block ${isActive ? 'text-gray-900 font-medium' : 'text-gray-600'}`
               }
             >
-              Produits
+              Promos
             </NavLink>
           </li>
           <li>
@@ -42,16 +42,6 @@ const Header: React.FC = () => {
               }
             >
               Promos
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/vue-db4"
-              className={({ isActive }) =>
-                `px-4 py-3 block ${isActive ? 'text-gray-900 font-medium' : 'text-gray-600'}`
-              }
-            >
-              Vue DB4
             </NavLink>
           </li>
         </ul>

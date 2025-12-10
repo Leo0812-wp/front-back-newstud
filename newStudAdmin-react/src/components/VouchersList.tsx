@@ -139,7 +139,7 @@ const VouchersList: React.FC = () => {
 
               <div className="space-y-3">
                 <div>
-                  <span className="text-sm text-gray-500">Produit :</span>
+                <span className="text-sm text-gray-500">Promo :</span>
                   <p className="font-medium text-gray-800">{getProductName(voucher.productId)}</p>
                 </div>
                 <div>

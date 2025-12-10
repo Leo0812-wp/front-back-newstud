@@ -36,12 +36,12 @@ const ProductsList: React.FC = () => {
     <div>
       <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">Liste des Produits</h2>
+        <h2 className="text-3xl font-bold text-gray-800">Liste des Promos</h2>
         <button
           onClick={() => navigate('/create-product')}
           className="bg-gray-900 text-white px-6 py-2 border font-medium hover:bg-gray-800"
         >
-          + Créer un Produit
+          + Créer une Promo
         </button>
       </div>
       {error && (

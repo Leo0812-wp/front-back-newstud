@@ -8,7 +8,6 @@ import CreateProduct from './components/CreateProduct';
 import CreateCompany from './components/CreateCompany';
 import EditProduct from './components/EditProduct';
 import EditCompany from './components/EditCompany';
-import VueDB4 from './components/VueDB4';
 import Login from './components/Login';
 import { authUtils } from './utils/auth';
 import Header from './components/Header';
@@ -102,15 +101,7 @@ function App() {
               </RequireAuth>
             }
           />
-          <Route
-            path="/vue-db4"
-            element={
-              <RequireAuth>
-                <Header />
-                <VueDB4 />
-              </RequireAuth>
-            }
-          />
+          
         </Routes>
       </div>
     </Router>

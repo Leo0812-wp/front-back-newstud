@@ -147,9 +147,9 @@ const EditProduct: React.FC = () => {
               desactivationTime: promoData.isIndefinite ? 'indefini' : promoData.desactivationTime,
               dayOfWeek: promoData.dayOfWeek,
             });
-            setSuccess('Produit et promo modifiés avec succès !');
+            setSuccess('Promo modifiée avec succès !');
           } catch (voucherErr: any) {
-            setSuccess('Produit modifié avec succès, mais erreur lors de la modification de la promo');
+            setSuccess('Promo modifiée avec succès, mais erreur lors de la modification de la promo');
             console.error('Erreur modification voucher:', voucherErr);
           }
         } else {
@@ -163,14 +163,14 @@ const EditProduct: React.FC = () => {
               dayOfWeek: promoData.dayOfWeek,
               nbUtilisation: promoData.nbVouchers,
             });
-            setSuccess('Produit modifié et promo créée avec succès !');
+            setSuccess('Promo modifiée et nouvelle promo créée avec succès !');
           } catch (voucherErr: any) {
-            setSuccess('Produit modifié avec succès, mais erreur lors de la création de la promo');
+            setSuccess('Promo modifiée avec succès, mais erreur lors de la création de la promo');
             console.error('Erreur création voucher:', voucherErr);
           }
         }
       } else {
-        setSuccess('Produit modifié avec succès !');
+        setSuccess('Promo modifiée avec succès !');
       }
       
       setTimeout(() => {
@@ -197,8 +197,8 @@ const EditProduct: React.FC = () => {
     return (
       <div>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <div className="text-gray-600">Chargement du produit...</div>
+            <div className="text-center py-12">
+            <div className="text-gray-600">Chargement de la promo...</div>
           </div>
         </div>
       </div>
@@ -216,7 +216,7 @@ const EditProduct: React.FC = () => {
             >
               ← Retour
             </button>
-            <h2 className="text-3xl font-bold">Modifier un Produit</h2>
+            <h2 className="text-3xl font-bold">Modifier une Promo</h2>
           </div>
 
           {error && (
