@@ -11,43 +11,58 @@ const Header: React.FC = () => {
   };
 
   return (
-    <nav className="border-b bg-white sticky top-0 z-10">
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <ul className="flex gap-4">
-          <li>
-            <NavLink
-              to="/products"
-              className={({ isActive }) =>
-                `px-4 py-3 block ${isActive ? 'text-gray-900 font-medium' : 'text-gray-600'}`
-              }
-            >
-              Promos
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/companies"
-              className={({ isActive }) =>
-                `px-4 py-3 block ${isActive ? 'text-gray-900 font-medium' : 'text-gray-600'}`
-              }
-            >
-              Entreprises
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/vouchers"
-              className={({ isActive }) =>
-                `px-4 py-3 block ${isActive ? 'text-gray-900 font-medium' : 'text-gray-600'}`
-              }
-            >
-              Promos
-            </NavLink>
-          </li>
-        </ul>
+    <nav className="sticky top-0 z-50 bg-white shadow-sm">
+      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+        {/* Logo / Brand */}
+        <div className="flex items-center gap-8">
+          <span className="text-xl font-bold text-[#D73738]">NewStud</span>
+          
+          {/* Navigation Links */}
+          <ul className="flex items-center">
+            <li>
+              <NavLink
+                to="/products"
+                className={({ isActive }) =>
+                  `relative px-4 py-2 text-sm font-medium transition-colors duration-200
+                   ${isActive 
+                     ? 'text-[#D73738]' 
+                     : 'text-[#0C0C0C] hover:text-[#D73738]'
+                   }
+                   after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
+                   after:h-0.5 after:bg-[#D73738] after:transition-all after:duration-200
+                   ${isActive ? 'after:w-6' : 'after:w-0 hover:after:w-6'}`
+                }
+              >
+                Promos
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/companies"
+                className={({ isActive }) =>
+                  `relative px-4 py-2 text-sm font-medium transition-colors duration-200
+                   ${isActive 
+                     ? 'text-[#D73738]' 
+                     : 'text-[#0C0C0C] hover:text-[#D73738]'
+                   }
+                   after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
+                   after:h-0.5 after:bg-[#D73738] after:transition-all after:duration-200
+                   ${isActive ? 'after:w-6' : 'after:w-0 hover:after:w-6'}`
+                }
+              >
+                Entreprises
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+
+        {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="text-sm text-red-600 hover:text-red-700 px-3 py-2 rounded-md border border-red-200 hover:border-red-300"
+          className="px-4 py-2 text-sm font-medium text-[#D73738] bg-white
+                     border border-[#D73738] rounded-xl
+                     hover:bg-[#D73738] hover:text-white
+                     transition-all duration-200 ease-in-out"
         >
           Déconnexion
         </button>
@@ -57,4 +72,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-

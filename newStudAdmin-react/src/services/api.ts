@@ -120,6 +120,7 @@ export const productService = {
     api.post('/products/create', productData),
   update: (id: string, productData: CreateProductData): Promise<any> =>
     api.post(`/update/products/${id}`, productData),
+  delete: (id: string): Promise<any> => api.delete(`/products/${id}`),
 };
 
 // Services pour les entreprises
@@ -132,6 +133,7 @@ export const companyService = {
     api.post('/company/create', companyData),
   update: (id: string, companyData: CreateCompanyData): Promise<any> =>
     api.post(`/update/company/${id}`, companyData),
+  delete: (id: string): Promise<any> => api.delete(`/company/${id}`),
 };
 
 // Services pour les vouchers (promos)

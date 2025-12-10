@@ -195,191 +195,244 @@ const EditProduct: React.FC = () => {
 
   if (loading) {
     return (
-      <div>
-        <div className="container mx-auto px-4 py-8">
-            <div className="text-center py-12">
-            <div className="text-gray-600">Chargement de la promo...</div>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#D73738] border-t-transparent mb-4"></div>
+          <p className="text-gray-600 text-lg font-medium">Chargement du produit...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      <div className="container mx-auto px-4 py-10">
+        <div className="max-w-4xl mx-auto">
+          {/* En-tête */}
+          <div className="mb-8">
             <button
               onClick={() => navigate('/products')}
-              className="text-gray-900 hover:underline font-semibold"
+              className="flex items-center gap-2 text-gray-600 hover:text-[#D73738] transition-colors mb-4 font-medium"
             >
-              ← Retour
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Retour à la liste
             </button>
-            <h2 className="text-3xl font-bold">Modifier une Promo</h2>
+            <h1 className="text-4xl font-bold text-[#0C0C0C] mb-2">Modifier un Produit</h1>
+            <p className="text-gray-600 text-base">Modifiez les informations du produit et de sa promotion</p>
           </div>
 
+          {/* Messages d'alerte */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-6">
-              {error}
+            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 flex items-center gap-3">
+              <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 mb-6">
-              {success}
+            <div className="bg-green-50 border-2 border-green-200 text-green-700 px-6 py-4 rounded-xl mb-6 flex items-center gap-3">
+              <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">{success}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="border p-6 space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom *
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows={4}
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                Catégorie *
-              </label>
-              <input
-                type="text"
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="companyId" className="block text-sm font-medium text-gray-700 mb-2">
-                Entreprise *
-              </label>
-              <select
-                id="companyId"
-                name="companyId"
-                value={formData.companyId}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              >
-                <option value="">Sélectionner une entreprise</option>
-                {companies.map((company) => (
-                  <option key={company.id} value={company.id}>
-                    {company.data.name} (ID: {company.id})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-8 space-y-8">
+            {/* Section Informations principales */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-[#0C0C0C] pb-3 border-b-2 border-gray-200">Informations principales</h2>
+              
               <div>
-                <label htmlFor="priceInit" className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix initial
+                <label htmlFor="name" className="block text-sm font-bold text-gray-700 mb-2">
+                  Nom du produit *
                 </label>
                 <input
                   type="text"
-                  id="priceInit"
-                  name="priceInit"
-                  value={formData.priceInit}
+                  id="name"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
                 />
               </div>
 
               <div>
-                <label htmlFor="priceFinal" className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix final
+                <label htmlFor="description" className="block text-sm font-bold text-gray-700 mb-2">
+                  Description *
                 </label>
-                <input
-                  type="text"
-                  id="priceFinal"
-                  name="priceFinal"
-                  value={formData.priceFinal}
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                  required
+                  rows={4}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base resize-none"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="category" className="block text-sm font-bold text-gray-700 mb-2">
+                    Catégorie *
+                  </label>
+                  <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="companyId" className="block text-sm font-bold text-gray-700 mb-2">
+                    Entreprise *
+                  </label>
+                  <select
+                    id="companyId"
+                    name="companyId"
+                    value={formData.companyId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base bg-white cursor-pointer"
+                  >
+                    <option value="">Sélectionner une entreprise</option>
+                    {companies.map((company) => (
+                      <option key={company.id} value={company.id}>
+                        {company.data.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
-            <div>
-              <label htmlFor="promotion" className="block text-sm font-medium text-gray-700 mb-2">
-                Promotion (%)
-              </label>
-              <input
-                type="text"
-                id="promotion"
-                name="promotion"
-                value={formData.promotion}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              />
+            {/* Section Prix et promotion */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-[#0C0C0C] pb-3 border-b-2 border-gray-200">Prix et promotion</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label htmlFor="priceInit" className="block text-sm font-bold text-gray-700 mb-2">
+                    Prix initial
+                  </label>
+                  <input
+                    type="text"
+                    id="priceInit"
+                    name="priceInit"
+                    value={formData.priceInit}
+                    onChange={handleChange}
+                    placeholder="0.00 €"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="priceFinal" className="block text-sm font-bold text-gray-700 mb-2">
+                    Prix final
+                  </label>
+                  <input
+                    type="text"
+                    id="priceFinal"
+                    name="priceFinal"
+                    value={formData.priceFinal}
+                    onChange={handleChange}
+                    placeholder="0.00 €"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="promotion" className="block text-sm font-bold text-gray-700 mb-2">
+                    Promotion (%)
+                  </label>
+                  <input
+                    type="text"
+                    id="promotion"
+                    name="promotion"
+                    value={formData.promotion}
+                    onChange={handleChange}
+                    placeholder="0 %"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="urlImageCompanyPage" className="block text-sm font-medium text-gray-700 mb-2">
-                URL Image (Page entreprise)
-              </label>
-              <input
-                type="text"
-                id="urlImageCompanyPage"
-                name="urlImageCompanyPage"
-                value={formData.urlImageCompanyPage}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-              />
+            {/* Section Image */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-[#0C0C0C] pb-3 border-b-2 border-gray-200">Image</h2>
+              
+              <div>
+                <label htmlFor="urlImageCompanyPage" className="block text-sm font-bold text-gray-700 mb-2">
+                  URL Image (Page entreprise)
+                </label>
+                <input
+                  type="text"
+                  id="urlImageCompanyPage"
+                  name="urlImageCompanyPage"
+                  value={formData.urlImageCompanyPage}
+                  onChange={handleChange}
+                  placeholder="https://..."
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
+                />
+                {formData.urlImageCompanyPage && (
+                  <div className="mt-3">
+                    <img
+                      src={formData.urlImageCompanyPage}
+                      alt="Aperçu"
+                      className="max-w-full h-48 object-cover rounded-xl border-2 border-gray-200"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Section modification de promo */}
-            <div className="border-t pt-6 mt-6">
-              <h3 className="font-semibold text-gray-700 mb-4">Paramètres de la promo</h3>
+            {/* Section Promo */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b-2 border-gray-200">
+                <h2 className="text-2xl font-bold text-[#0C0C0C]">Paramètres de la promotion</h2>
+                <div className="flex items-center gap-2 bg-[#D73738] bg-opacity-10 px-4 py-2 rounded-xl">
+                  <svg className="w-5 h-5 text-[#D73738]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-bold text-[#D73738]">Promotion active</span>
+                </div>
+              </div>
 
-              <div className="space-y-6 bg-gray-50 p-4">
-                <div className="flex items-center mb-4">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 space-y-6">
+                <div className="flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-gray-200">
                   <input
                     type="checkbox"
                     id="isIndefinite"
                     name="isIndefinite"
                     checked={promoData.isIndefinite}
                     onChange={handlePromoChange}
-                    className="mr-2"
+                    className="w-5 h-5 text-[#D73738] border-gray-300 rounded focus:ring-[#D73738] cursor-pointer"
                   />
-                  <label htmlFor="isIndefinite" className="text-sm text-gray-700">
-                    Indéfini (jusqu'à fin manuelle)
+                  <label htmlFor="isIndefinite" className="text-sm font-bold text-gray-700 cursor-pointer flex-1">
+                    Promotion indéfinie (jusqu'à désactivation manuelle)
                   </label>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label
                       htmlFor="activationTime"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-sm font-bold text-gray-700 mb-2"
                     >
                       Heure d'activation * (HH:MM)
                     </label>
@@ -390,14 +443,14 @@ const EditProduct: React.FC = () => {
                       value={promoData.activationTime}
                       onChange={handlePromoChange}
                       required
-                      className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
                     />
                   </div>
 
                   <div>
                     <label
                       htmlFor="desactivationTime"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-sm font-bold text-gray-700 mb-2"
                     >
                       Heure de désactivation * (HH:MM)
                     </label>
@@ -409,13 +462,13 @@ const EditProduct: React.FC = () => {
                       onChange={handlePromoChange}
                       required={!promoData.isIndefinite}
                       disabled={promoData.isIndefinite}
-                      className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="dayOfWeek" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="dayOfWeek" className="block text-sm font-bold text-gray-700 mb-2">
                     Jour de la semaine *
                   </label>
                   <select
@@ -424,7 +477,7 @@ const EditProduct: React.FC = () => {
                     value={promoData.dayOfWeek}
                     onChange={handlePromoChange}
                     required
-                    className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base bg-white cursor-pointer"
                   >
                     <option value="">Sélectionner un jour</option>
                     {daysOfWeek.map((day) => (
@@ -435,58 +488,73 @@ const EditProduct: React.FC = () => {
                   </select>
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="nbUtilisation"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Nombre d'utilisations sur l'offre *
-                  </label>
-                  <input
-                    type="number"
-                    id="nbUtilisation"
-                    name="nbUtilisation"
-                    value={promoData.nbUtilisation}
-                    onChange={handlePromoChange}
-                    required
-                    min="1"
-                    className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                  />
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="nbUtilisation"
+                      className="block text-sm font-bold text-gray-700 mb-2"
+                    >
+                      Nombre d'utilisations sur l'offre *
+                    </label>
+                    <input
+                      type="number"
+                      id="nbUtilisation"
+                      name="nbUtilisation"
+                      value={promoData.nbUtilisation}
+                      onChange={handlePromoChange}
+                      required
+                      min="1"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
+                    />
+                  </div>
 
-                <div>
-                  <label
-                    htmlFor="nbVouchers"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Nombre d'utilisation par jours * (max 3)
-                  </label>
-                  <input
-                    type="number"
-                    id="nbVouchers"
-                    name="nbVouchers"
-                    value={promoData.nbVouchers}
-                    onChange={handlePromoChange}
-                    min="1"
-                    max="3"
-                    className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                  />
+                  <div>
+                    <label
+                      htmlFor="nbVouchers"
+                      className="block text-sm font-bold text-gray-700 mb-2"
+                    >
+                      Nombre d'utilisations par jour * (max 3)
+                    </label>
+                    <input
+                      type="number"
+                      id="nbVouchers"
+                      name="nbVouchers"
+                      value={promoData.nbVouchers}
+                      onChange={handlePromoChange}
+                      min="1"
+                      max="3"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D73738] focus:outline-none transition-colors text-base"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
+            {/* Boutons d'action */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t-2 border-gray-200">
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 bg-gray-900 text-white py-3 px-6 border font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-[#D73738] text-white py-3.5 px-8 rounded-xl font-bold text-lg hover:bg-[#c02f30] transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
               >
-                {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                {saving ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Enregistrement...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Enregistrer les modifications</span>
+                  </>
+                )}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/products')}
-                className="px-6 py-3 border text-gray-700 font-medium hover:bg-gray-50"
+                className="px-8 py-3.5 border-2 border-gray-300 text-gray-700 rounded-xl font-bold text-base hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
               >
                 Annuler
               </button>
