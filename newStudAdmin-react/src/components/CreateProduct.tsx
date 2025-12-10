@@ -545,6 +545,20 @@ const CreateProduct: React.FC = () => {
           <h3 className="font-semibold text-gray-700 mb-4">Paramètres de la promo</h3>
 
           <div className="space-y-6 bg-gray-50 p-4">
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="isIndefinite"
+                name="isIndefinite"
+                checked={promoData.isIndefinite}
+                onChange={handlePromoChange}
+                className="mr-2"
+              />
+              <label htmlFor="isIndefinite" className="text-sm text-gray-700">
+                Indéfini (jusqu'à fin manuelle)
+              </label>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
@@ -571,33 +585,16 @@ const CreateProduct: React.FC = () => {
                 >
                   Heure de désactivation * (HH:MM)
                 </label>
-                
-                  <input
-                    type="time"
-                    id="desactivationTime"
-                    name="desactivationTime"
-                    value={promoData.isIndefinite ? '' : promoData.desactivationTime}
-                    onChange={handlePromoChange}
-                    required={!promoData.isIndefinite}
-                    disabled={promoData.isIndefinite}
-                    className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  />
-                  <div className="space-y-2">
-                  <div className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id="isIndefinite"
-                      name="isIndefinite"
-                      checked={promoData.isIndefinite}
-                      onChange={handlePromoChange}
-                      className="mr-2"
-                    />
-                    <label htmlFor="isIndefinite" className="text-sm text-gray-700">
-                      Indéfini (jusqu'à fin manuelle)
-                    </label>
-                  </div>
-                  
-                </div>
+                <input
+                  type="time"
+                  id="desactivationTime"
+                  name="desactivationTime"
+                  value={promoData.isIndefinite ? '' : promoData.desactivationTime}
+                  onChange={handlePromoChange}
+                  required={!promoData.isIndefinite}
+                  disabled={promoData.isIndefinite}
+                  className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
               </div>
             </div>
 
