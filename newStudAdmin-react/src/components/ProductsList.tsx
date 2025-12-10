@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productService } from '../services/api';
 import { Product } from '../types';
-import Header from './Header';
 
 const ProductsList: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +34,6 @@ const ProductsList: React.FC = () => {
 
   return (
     <div>
-      <Header />
       <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Liste des Produits</h2>

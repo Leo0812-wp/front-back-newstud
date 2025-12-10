@@ -36,6 +36,16 @@ class AuthController {
       }
   
       const token = jwt.sign({ username }, jwtSecret, { expiresIn: '1h' });
+
+      // Cookie accessible en HTTP (dev), SameSite Lax, pas Secure pour localhost
+      res.cookie('newstud_admin_token', token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
+      });
+
       res.json({ token });
     } catch (error) {
       res.status(500).json({ error: error.message });

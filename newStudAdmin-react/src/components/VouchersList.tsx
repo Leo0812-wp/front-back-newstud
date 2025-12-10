@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { voucherService, productService, companyService } from '../services/api';
 import { Voucher } from '../types';
 import { Product, Company } from '../types';
-import Header from './Header';
 
 const VouchersList: React.FC = () => {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
@@ -79,7 +78,6 @@ const VouchersList: React.FC = () => {
 
   return (
     <div>
-      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800">Liste des Promos (Vouchers)</h2>

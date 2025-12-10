@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productService, companyService, voucherService } from '../services/api';
 import { CreateProductData, Company, Voucher } from '../types';
-import Header from './Header';
 
 const EditProduct: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -197,7 +196,6 @@ const EditProduct: React.FC = () => {
   if (loading) {
     return (
       <div>
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <div className="text-gray-600">Chargement du produit...</div>
@@ -209,7 +207,6 @@ const EditProduct: React.FC = () => {
 
   return (
     <div>
-      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-4 mb-8">

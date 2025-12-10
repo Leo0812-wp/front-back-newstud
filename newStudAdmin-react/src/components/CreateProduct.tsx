@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productService, companyService, voucherService } from '../services/api';
 import { CreateProductData, CreateCompanyData, Company } from '../types';
-import Header from './Header';
 
 type CompanySelectionMode = 'existing' | 'new';
 
@@ -339,7 +338,6 @@ const handleChange = (
 
   return (
     <div>
-      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-4 mb-8">

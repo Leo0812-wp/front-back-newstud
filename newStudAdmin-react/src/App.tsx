@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProductsList from './components/ProductsList';
 import CompaniesList from './components/CompaniesList';
@@ -9,22 +9,108 @@ import CreateCompany from './components/CreateCompany';
 import EditProduct from './components/EditProduct';
 import EditCompany from './components/EditCompany';
 import VueDB4 from './components/VueDB4';
+import Login from './components/Login';
+import { authUtils } from './utils/auth';
+import Header from './components/Header';
+
+const RequireAuth: React.FC<{ children: ReactNode }> = ({ children }) => {
+  if (!authUtils.hasToken()) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+};
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-white">
         <Routes>
-          <Route path="/" element={<Navigate to="/vouchers" replace />} />
-          <Route path="/products" element={<ProductsList />} />
-          <Route path="/companies" element={<CompaniesList />} />
-          <Route path="/vouchers" element={<VouchersList />} />
-          <Route path="/edit-voucher/:id" element={<EditVoucher />} />
-          <Route path="/create-product" element={<CreateProduct />} />
-          <Route path="/edit-product/:id" element={<EditProduct />} />
-          <Route path="/create-company" element={<CreateCompany />} />
-          <Route path="/edit-company/:id" element={<EditCompany />} />
-          <Route path="/vue-db4" element={<VueDB4 />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={<Navigate to="/vouchers" replace />}
+          />
+          <Route
+            path="/products"
+            element={
+              <RequireAuth>
+                <Header />
+                <ProductsList />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/companies"
+            element={
+              <RequireAuth>
+                <Header />
+                <CompaniesList />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/vouchers"
+            element={
+              <RequireAuth>
+                <Header />
+                <VouchersList />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/edit-voucher/:id"
+            element={
+              <RequireAuth>
+                <Header />
+                <EditVoucher />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/create-product"
+            element={
+              <RequireAuth>
+                <Header />
+                <CreateProduct />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/edit-product/:id"
+            element={
+              <RequireAuth>
+                <Header />
+                <EditProduct />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/create-company"
+            element={
+              <RequireAuth>
+                <Header />
+                <CreateCompany />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/edit-company/:id"
+            element={
+              <RequireAuth>
+                <Header />
+                <EditCompany />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/vue-db4"
+            element={
+              <RequireAuth>
+                <Header />
+                <VueDB4 />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </div>
     </Router>

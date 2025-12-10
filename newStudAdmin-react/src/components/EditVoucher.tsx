@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { voucherService, productService, companyService } from '../services/api';
 import { UpdateVoucherData, Product, Company } from '../types';
-import Header from './Header';
 
 const EditVoucher: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -98,7 +97,6 @@ const EditVoucher: React.FC = () => {
 
   return (
     <div>
-      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
