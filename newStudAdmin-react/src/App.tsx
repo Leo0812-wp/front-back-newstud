@@ -2,8 +2,6 @@ import React, { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProductsList from './components/ProductsList';
 import CompaniesList from './components/CompaniesList';
-import VouchersList from './components/VouchersList';
-import EditVoucher from './components/EditVoucher';
 import CreateProduct from './components/CreateProduct';
 import CreateCompany from './components/CreateCompany';
 import EditProduct from './components/EditProduct';
@@ -48,24 +46,6 @@ function App() {
             }
           />
           <Route
-            path="/vouchers"
-            element={
-              <RequireAuth>
-                <Header />
-                <VouchersList />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/edit-voucher/:id"
-            element={
-              <RequireAuth>
-                <Header />
-                <EditVoucher />
-              </RequireAuth>
-            }
-          />
-          <Route
             path="/create-product"
             element={
               <RequireAuth>
@@ -101,7 +81,10 @@ function App() {
               </RequireAuth>
             }
           />
-          
+          <Route
+            path="*"
+            element={<Navigate to="/products" replace />}
+          />
         </Routes>
       </div>
     </Router>
