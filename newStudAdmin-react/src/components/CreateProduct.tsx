@@ -323,6 +323,66 @@ const handleChange = (
     }
   };
 
+<<<<<<< Updated upstream
+=======
+   // Fonction pour ajouter/retirer un jour
+  const toggleDay = (dayValue: string) => {
+    setPromoData((prev) => {
+      const currentDays = prev.dayOfWeek;
+      // Si le jour est déjà là, on le retire, sinon on l'ajoute
+      const newDays = currentDays.includes(dayValue)
+        ? currentDays.filter((d) => d !== dayValue)
+        : [...currentDays, dayValue];
+      
+      return { ...prev, dayOfWeek: newDays };
+    });
+  };
+
+  // Fonction pour générer le texte affiché (ex: "Lundi, Week-end")
+  const getSelectedDaysLabel = () => {
+    const selected = promoData.dayOfWeek;
+    if (selected.length === 0) return 'Aucun jour sélectionné';
+    if (selected.length === 7) return 'Tous les jours';
+
+    const hasSaturday = selected.includes('samedi');
+    const hasSunday = selected.includes('dimanche');
+    const hasMonday = selected.includes('lundi');
+    const hasTuesday = selected.includes('mardi');
+    const hasWednesday = selected.includes('mercredi');
+    const hasThursday = selected.includes('jeudi');
+    const hasFriday = selected.includes('vendredi');
+
+    // Vérifier si tous les jours ouvrables (lundi-vendredi) sont sélectionnés
+    const allWeekdaysSelected = hasMonday && hasTuesday && hasWednesday && hasThursday && hasFriday;
+
+    // On prend tous les jours SAUF samedi et dimanche pour commencer
+    let labels: string[] = [];
+
+    if (allWeekdaysSelected && !hasSaturday && !hasSunday) {
+      // Si uniquement lundi-vendredi sont sélectionnés, afficher "Semaine"
+      labels.push('Semaine');
+    } else if (allWeekdaysSelected) {
+      // Si lundi-vendredi + weekend
+      labels.push('Semaine');
+    } else {
+      // Sinon, afficher les jours individuels
+      labels = selected
+        .filter((d) => d !== 'samedi' && d !== 'dimanche')
+        .map((d) => d.charAt(0).toUpperCase() + d.slice(1)); // Capitalize (Lundi)
+    }
+
+    // Logique spéciale Week-end
+    if (hasSaturday && hasSunday) {
+      labels.push('Week-end');
+    } else {
+      if (hasSaturday) labels.push('Samedi');
+      if (hasSunday) labels.push('Dimanche');
+    }
+
+    return labels.join(', ');
+  };
+
+>>>>>>> Stashed changes
   const daysOfWeek = [
     { value: 'lundi', label: 'Lundi' },
     { value: 'mardi', label: 'Mardi' },
