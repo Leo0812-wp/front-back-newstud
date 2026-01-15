@@ -19,38 +19,62 @@ class AuthController {
   }
 
   async login(req, res) {
-    try {
-      const { username, password } = req.body;
-      const user = await userAdmin.getUserByUid(username);
-  
-      if (!user) {
-        res.status(401).json({ error: 'User not authorized' });
-        return;
-      }
-      const storedPassword = user.password;
-      const passwordMatch = await bcrypt.compare(password, storedPassword);
-  
-      if (!passwordMatch) {
-        res.status(401).json({ error: 'Incorrect password' });
-        return;
-      }
-  
-      const token = jwt.sign({ username }, jwtSecret, { expiresIn: '1h' });
+  try {
+    const { username, password, rememberMe } = req.body; 
 
-      // Cookie accessible en HTTP (dev), SameSite Lax, pas Secure pour localhost
-      res.cookie('newstud_admin_token', token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        path: '/',
-      });
+    const user = await userAdmin.getUserByUid(username);
 
-      res.json({ token });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    if (!user) {
+      res.status(401).json({ error: 'User not authorized' });
+      return;
     }
+
+    const storedPassword = user.password;
+    const passwordMatch = await bcrypt.compare(password, storedPassword);
+
+    if (!passwordMatch) {
+      res.status(401).json({ error: 'Incorrect password' });
+      return;
+    }
+
+    const tokenDuration = rememberMe ? "30d" : "1h";
+
+    const token = jwt.sign({ username }, jwtSecret, { expiresIn: tokenDuration });
+
+    
+    const cookieMaxAge = rememberMe
+      ? 30 * 24 * 60 * 60 * 1000   
+      : 60 * 60 * 1000;            
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie("newstud_admin_token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: cookieMaxAge,
+      path: "/",
+    });
+
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+}
+
+  async me(req, res) {
+    res.json({ authenticated: true, user: req.userData });
+  }
+
+  async logout(req, res) {
+    res.clearCookie("newstud_admin_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax",
+      path: "/",
+    });
+    res.json({ success: true });
+  }
+
 
 }
 

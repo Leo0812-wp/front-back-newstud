@@ -66,5 +66,7 @@ router.post('/register', verifyToken, authController.register);
  *               - password
  */
 router.post('/login', authController.login);
+router.get('/me', verifyToken, authController.me);
+router.post('/logout', authController.logout);
 
 module.exports = router;

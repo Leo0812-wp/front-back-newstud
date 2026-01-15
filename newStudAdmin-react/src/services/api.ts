@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { Product, Company, CreateVoucherData, Voucher, UpdateVoucherData, CreateProductData, CreateCompanyData, User } from '../types';
-import { authUtils } from '../utils/auth';
 
 // Détection automatique de l'URL du backend
 const getApiBaseUrl = (): string => {
@@ -24,58 +23,6 @@ const getApiBaseUrl = (): string => {
 const API_BASE_URL = getApiBaseUrl();
 const AUTH_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
 
-// Fonction pour récupérer le token (priorité: variables d'environnement > cookie/localStorage)
-const getAuthToken = (): string | null => {
-  // D'abord, chercher dans les variables d'environnement (priorité pour faciliter le dev)
-  const envToken = import.meta.env.VITE_JWT_TOKEN || 
-                   import.meta.env.VITE_AUTH_TOKEN || 
-                   import.meta.env.VITE_TOKEN ||
-                   import.meta.env.JWT_TOKEN ||
-                   import.meta.env.AUTH_TOKEN;
-  
-  // Si on a un token dans .env, on le stocke automatiquement dans le localStorage
-  if (envToken && import.meta.env.DEV) {
-    const storedToken = authUtils.getToken();
-    if (!storedToken || storedToken !== envToken) {
-      authUtils.setToken(envToken);
-    }
-    return envToken;
-  }
-
-  // Sinon, essayer depuis le cookie/localStorage
-  const tokenFromStorage = authUtils.getToken();
-  if (tokenFromStorage) {
-    return tokenFromStorage;
-  }
-
-  return null;
-};
-
-// Log en mode développement pour vérifier si le token est présent
-if (import.meta.env.DEV) {
-  const token = getAuthToken();
-  // Vérifier si on a un token dans le .env (nécessite redémarrage du serveur)
-  const envToken = import.meta.env.VITE_JWT_TOKEN || 
-                   import.meta.env.VITE_AUTH_TOKEN || 
-                   import.meta.env.VITE_TOKEN;
-  
-  if (envToken) {
-    // Forcer l'utilisation du token du .env
-    authUtils.setToken(envToken);
-    console.log('✅ Token du .env détecté et appliqué');
-    console.log('   Le token du .env a priorité sur le localStorage');
-  } else if (token) {
-    const source = authUtils.getToken() ? 'localStorage' : 'variables d\'environnement';
-    console.log(`✅ Token d'authentification trouvé (${source})`);
-    console.warn('   ⚠️  Aucun token dans le .env détecté');
-    console.warn('   Si vous avez ajouté VITE_JWT_TOKEN dans .env, redémarrez le serveur (npm run dev)');
-  } else {
-    console.warn('⚠️  Aucun token d\'authentification trouvé');
-    console.warn('   Vérifiez que VITE_JWT_TOKEN est défini dans votre fichier .env');
-    console.warn('   ou utilisez authUtils.setToken() pour le stocker dans localStorage');
-  }
-}
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true, // permet d'envoyer les cookies (même en HTTP en dev)
@@ -84,65 +31,14 @@ const api = axios.create({
   },
 });
 
-// Intercepteur pour ajouter le token aux requêtes de création/modification/suppression
-api.interceptors.request.use(
-  (config) => {
-    // Récupérer le token à chaque requête (pour prendre en compte les changements dynamiques)
-    const token = getAuthToken();
-    
-    // Ajouter le token uniquement pour les requêtes POST, PUT, DELETE (création/modification)
-    if (token && (config.method === 'post' || config.method === 'put' || config.method === 'delete')) {
-      config.headers.Authorization = `Bearer ${token}`;
-      if (import.meta.env.DEV) {
-        console.log(`🔐 Token ajouté à la requête ${config.method?.toUpperCase()} ${config.url}`);
-      }
-    } else if (!token && (config.method === 'post' || config.method === 'put' || config.method === 'delete')) {
-      console.error('❌ Tentative de requête authentifiée sans token disponible');
-      console.error(`   Requête: ${config.method?.toUpperCase()} ${config.url}`);
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 // Intercepteur pour gérer les erreurs 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const token = getAuthToken();
-      const envToken = import.meta.env.VITE_JWT_TOKEN || 
-                       import.meta.env.VITE_AUTH_TOKEN || 
-                       import.meta.env.VITE_TOKEN;
-      
       console.error('❌ Erreur 401 - Non autorisé');
       console.error(`   Requête: ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
-      
-      if (!token) {
-        console.error('   ⚠️  Aucun token trouvé');
-        console.error('   Vérifiez que VITE_JWT_TOKEN est défini dans votre fichier .env');
-      } else {
-        console.error('   ⚠️  Token présent mais invalide ou expiré');
-        
-        // Si on a un token dans .env, on nettoie le localStorage et on utilise celui du .env
-        if (envToken) {
-          authUtils.removeToken();
-          authUtils.setToken(envToken);
-          console.error('   ✅ Token du .env appliqué automatiquement');
-          console.error('   ⚠️  Rechargez la page (F5) pour utiliser le nouveau token');
-          // On peut aussi essayer de relancer la requête automatiquement
-          // mais pour l'instant, on demande juste de recharger
-        } else {
-          console.error('   ⚠️  Aucun token valide trouvé dans le .env');
-          console.error('   📝 Étapes à suivre :');
-          console.error('   1. Exécutez: cd newStudBack-main && node scripts/generateToken.js');
-          console.error('   2. Copiez le token dans newStudAdmin-react/.env comme VITE_JWT_TOKEN=...');
-          console.error('   3. Redémarrez le serveur: npm run dev');
-          console.error('   4. Rechargez la page dans le navigateur');
-        }
-      }
+      console.error('   ⚠️  Session expirée ou cookie absent');
     }
     return Promise.reject(error);
   }
@@ -206,22 +102,21 @@ export const userService = {
 
 // Services d'authentification
 export const authService = {
-  login: async (credentials: { username: string; password: string }): Promise<{ token?: string }> => {
+  login: async (credentials: { username: string; password: string; rememberMe?: boolean }): Promise<{ token?: string }> => {
     const { data } = await axios.post(
       `${AUTH_BASE_URL}/auth/login`,
       credentials,
       { withCredentials: true }
     );
-    // Si le backend renvoie le token (utile en dev HTTP), on le stocke aussi dans le cookie
-    if (data?.token) {
-      authUtils.setToken(data.token);
-    }
     return data;
   },
-  logout: (): void => {
-    authUtils.removeToken();
+  me: async (): Promise<{ authenticated: boolean }> => {
+    const { data } = await axios.get(`${AUTH_BASE_URL}/auth/me`, { withCredentials: true });
+    return data;
+  },
+  logout: async (): Promise<void> => {
+    await axios.post(`${AUTH_BASE_URL}/auth/logout`, {}, { withCredentials: true });
   },
 };
 
 export default api;
-

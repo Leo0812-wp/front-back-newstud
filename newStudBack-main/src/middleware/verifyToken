@@ -2,23 +2,13 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const jwtSecret = process.env.JWT_SECRET;
 
-const getCookieToken = (cookieHeader) => {
-  if (!cookieHeader) return null;
-  const cookies = cookieHeader.split(';').map((c) => c.trim());
-  const entry = cookies.find((c) => c.startsWith('newstud_admin_token='));
-  if (!entry) return null;
-  return decodeURIComponent(entry.split('=')[1]);
-};
-
 function verifyToken(req, res, next) {
-  // Priorité au header Authorization, sinon cookie
-  let bearerToken = req.headers.authorization;
-  let token = null;
+  // Priorité au cookie httpOnly, fallback au header Authorization
+  let token = req.cookies?.newstud_admin_token || null;
+  const bearerToken = req.headers.authorization;
 
-  if (bearerToken && bearerToken.startsWith('Bearer ')) {
+  if (!token && bearerToken && bearerToken.startsWith('Bearer ')) {
     token = bearerToken.replace('Bearer ', '');
-  } else {
-    token = getCookieToken(req.headers.cookie);
   }
 
   if (!token) {
