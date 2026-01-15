@@ -15,6 +15,7 @@ const CreateProduct: React.FC = () => {
     priceInit: '',
     priceFinal: '',
     promotion: '',
+    usable: 1,
     urlImageCompanyPage: '',
     urlImageProductPage: [],
   });
@@ -256,6 +257,7 @@ const handleChange = (
       const productResponse = await productService.create({
         ...formData,
         companyId: finalCompanyId,
+        usable: formData.usable || 1, // S'assurer que usable est un nombre
       });
       
       // Récupérer l'ID du produit créé
@@ -638,17 +640,19 @@ const handleChange = (
               </div>
             </div>
 
-            <div>
-              <label htmlFor="promotion" className="block text-sm font-medium text-gray-900 mb-3">Promotion (%)</label>
-              <input
-                type="text"
-                id="promotion"
-                name="promotion"
-                value={formData.promotion}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition"
-              />
-            </div>
+        <div>
+          <label htmlFor="promotion" className="block text-sm font-medium text-gray-700 mb-2">
+            Promotion (%)
+          </label>
+          <input
+            type="text"
+            id="promotion"
+            name="promotion"
+            value={formData.promotion}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+          />
+        </div>
 
             <div>
               <label htmlFor="urlImageCompanyPage" className="block text-sm font-medium text-gray-900 mb-3">URL Image (Page entreprise)</label>

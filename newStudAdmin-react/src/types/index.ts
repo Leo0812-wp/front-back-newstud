@@ -78,3 +78,15 @@ export interface CreateCompanyData {
   urlImage?: string;
 }
 
+export interface User {
+  id: string;
+  data: {
+    uid?: string;
+    name?: string;
+    firstName?: string;
+    username?: string;
+    favorites?: string[];
+    vouchersUsed?: string[];
+    [key: string]: any;
+  };
+}

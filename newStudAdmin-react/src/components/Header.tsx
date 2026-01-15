@@ -1,69 +1,63 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { authUtils } from "../utils/auth";
+import { authService } from "../services/api";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    authUtils.removeToken();
-    navigate("/login", { replace: true });
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } finally {
+      navigate("/login", { replace: true });
+    }
   };
 
   return (
-    <header className="bg-white shadow-md px-6 lg:px-12 sticky top-0 z-50">
-      <div className="max-w-[1400px] mx-auto h-20 flex items-center justify-between">
-
-        {/* LEFT SIDE — LOGO + NAV */}
-        <div className="flex items-center gap-12">
-
-          {/* Logo */}
-          <NavLink
-            to="/"
-            className="text-2xl font-bold tracking-wide text-[#D73738] hover:opacity-80 transition"
-          >
-            NewStud
-          </NavLink>
-
-          {/* Navigation Menu */}
-          <nav className="hidden lg:block">
-            <ul className="flex items-center gap-10">
-
-              {/* Promos */}
-              <li>
-                <NavLink
-                  to="/products"
-                  className={({ isActive }) =>
-                    `relative text-[16px] font-medium transition-all pb-1
-                     ${isActive ? "text-[#D73738]" : "text-[#0C0C0C] hover:text-[#D73738]"}
-                     after:absolute after:left-0 after:bottom-0 after:h-[3px]
-                     after:bg-[#D73738] after:rounded-md after:transition-all
-                     ${isActive ? "after:w-full" : "after:w-0 hover:after:w-full"}`
-                  }
-                >
-                  Promos
-                </NavLink>
-              </li>
-
-              {/* Entreprises */}
-              <li>
-                <NavLink
-                  to="/companies"
-                  className={({ isActive }) =>
-                    `relative text-[16px] font-medium transition-all pb-1
-                     ${isActive ? "text-[#D73738]" : "text-[#0C0C0C] hover:text-[#D73738]"}
-                     after:absolute after:left-0 after:bottom-0 after:h-[3px]
-                     after:bg-[#D73738] after:rounded-md after:transition-all
-                     ${isActive ? "after:w-full" : "after:w-0 hover:after:w-full"}`
-                  }
-                >
-                  Entreprises
-                </NavLink>
-              </li>
-
-            </ul>
-          </nav>
+    <nav className="sticky top-0 z-50 bg-white shadow-sm">
+      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+        {/* Logo / Brand */}
+        <div className="flex items-center gap-8">
+          <span className="text-xl font-bold text-[#D73738]">NewStud</span>
+          
+          {/* Navigation Links */}
+          <ul className="flex items-center">
+            <li>
+              <NavLink
+                to="/products"
+                className={({ isActive }) =>
+                  `relative px-4 py-2 text-sm font-medium transition-colors duration-200
+                   ${isActive 
+                     ? 'text-[#D73738]' 
+                     : 'text-[#0C0C0C] hover:text-[#D73738]'
+                   }
+                   after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
+                   after:h-0.5 after:bg-[#D73738] after:transition-all after:duration-200
+                   ${isActive ? 'after:w-6' : 'after:w-0 hover:after:w-6'}`
+                }
+              >
+                Promos
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/companies"
+                className={({ isActive }) =>
+                  `relative px-4 py-2 text-sm font-medium transition-colors duration-200
+                   ${isActive 
+                     ? 'text-[#D73738]' 
+                     : 'text-[#0C0C0C] hover:text-[#D73738]'
+                   }
+                   after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
+                   after:h-0.5 after:bg-[#D73738] after:transition-all after:duration-200
+                   ${isActive ? 'after:w-6' : 'after:w-0 hover:after:w-6'}`
+                }
+              >
+                Entreprises
+              </NavLink>
+            </li>
+          </ul>
         </div>
 
         {/* RIGHT SIDE — USER + LOGOUT */}
@@ -130,7 +124,7 @@ const Header: React.FC = () => {
 
         </ul>
       </nav>
-    </header>
+    </nav>
   );
 };
 

@@ -46,10 +46,11 @@ class AuthController {
       ? 30 * 24 * 60 * 60 * 1000   
       : 60 * 60 * 1000;            
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie("newstud_admin_token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: cookieMaxAge,
       path: "/",
     });
@@ -59,6 +60,20 @@ class AuthController {
     res.status(500).json({ error: error.message });
   }
 }
+
+  async me(req, res) {
+    res.json({ authenticated: true, user: req.userData });
+  }
+
+  async logout(req, res) {
+    res.clearCookie("newstud_admin_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax",
+      path: "/",
+    });
+    res.json({ success: true });
+  }
 
 
 }

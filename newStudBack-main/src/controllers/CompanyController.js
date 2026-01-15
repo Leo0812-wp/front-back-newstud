@@ -139,17 +139,21 @@ class CompanyController {
         return res.status(400).json({ error: 'L\'identifiant de la company est requis pour la mise à jour.' });
       }
   
-      const { description, name, category, place } = req.body;
+      const { description, name, category, place, urlImage } = req.body;
   
       if (!description || !name || !place || !category) {
         return res.status(400).json({ error: 'Toutes les données sont nécessaires pour mettre à jour une company.' });
       }
+  
+      // Utiliser l'URL d'image fournie ou l'image par défaut si aucune n'est fournie
+      let imageUrl = urlImage || 'https://firebasestorage.googleapis.com/v0/b/newstud.appspot.com/o/noImage.png?alt=media&token=73859999-8ac4-48fc-9f8c-5aa14d279fc1';
   
       const updatedCompany = {
         description,
         name,
         category,
         place,
+        urlImage: imageUrl,
       };
   
       const docRef = this.collectionCompany.doc(companyId);

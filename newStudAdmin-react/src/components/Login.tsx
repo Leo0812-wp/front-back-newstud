@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { authService } from "../services/api";
-import { authUtils } from "../utils/auth";
 import logo from "../assets/newstud-test 2.png";
 
 const Login: React.FC = () => {
@@ -13,9 +12,22 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
-  if (authUtils.hasToken()) {
-    return <Navigate to="/vouchers" replace />;
-  }
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    authService
+      .me()
+      .then(() => {
+        if (active) navigate("/vouchers", { replace: true });
+      })
+      .catch(() => {
+        if (active) setCheckingSession(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +35,7 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      await authService.login({ username, password });
+      await authService.login({ username, password, rememberMe });
       navigate("/vouchers", { replace: true });
     } catch (err: any) {
       const msg =
@@ -35,6 +47,10 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return <div className="min-h-screen flex items-center justify-center text-gray-600">Chargement...</div>;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
