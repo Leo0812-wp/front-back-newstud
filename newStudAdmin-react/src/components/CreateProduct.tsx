@@ -321,8 +321,6 @@ const handleChange = (
     }
   };
 
-<<<<<<< Updated upstream
-=======
    // Fonction pour ajouter/retirer un jour
   const toggleDay = (dayValue: string) => {
     setPromoData((prev) => {
@@ -380,7 +378,6 @@ const handleChange = (
     return labels.join(', ');
   };
 
->>>>>>> Stashed changes
   const daysOfWeek = [
     { value: 'lundi', label: 'Lundi' },
     { value: 'mardi', label: 'Mardi' },
