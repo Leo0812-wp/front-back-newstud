@@ -33,7 +33,7 @@ export interface Voucher {
   companyId: string;
   activationTime: string;
   desactivationTime: string;
-  dayOfWeek: string;
+  dayOfWeek: string | string[];
   voucher1?: string;
   voucher2?: string;
   voucher3?: string;
@@ -45,7 +45,7 @@ export interface UpdateVoucherData {
   companyId: string;
   activationTime: string;
   desactivationTime: string;
-  dayOfWeek: string;
+  dayOfWeek: string | string[];
 }
 
 export interface CreateVoucherData {
@@ -53,7 +53,7 @@ export interface CreateVoucherData {
   companyId: string;
   activationTime: string;
   desactivationTime: string;
-  dayOfWeek: string;
+  dayOfWeek: string[];
   nbUtilisation: number;
 }
 
@@ -62,7 +62,6 @@ export interface CreateProductData {
   description: string;
   category: string;
   companyId: string;
-  usable?: number;
   priceInit?: string;
   priceFinal?: string;
   promotion?: string;

@@ -15,7 +15,6 @@ const CreateProduct: React.FC = () => {
     priceInit: '',
     priceFinal: '',
     promotion: '',
-    usable: 1,
     urlImageCompanyPage: '',
     urlImageProductPage: [],
   });
@@ -44,14 +43,14 @@ const getCurrentTime = () => {
   const [promoData, setPromoData] = useState<{
     activationTime: string;
     desactivationTime: string;
-    dayOfWeek: string;
+    dayOfWeek: string[];
     nbUtilisation: number;
     nbVouchers: number;
     isIndefinite: boolean;
   }>({
     activationTime: getCurrentTime(),
     desactivationTime: '',
-    dayOfWeek: '',
+    dayOfWeek: [],
     nbUtilisation: 1,
     nbVouchers: 1,
     isIndefinite: false,
@@ -257,7 +256,6 @@ const handleChange = (
       const productResponse = await productService.create({
         ...formData,
         companyId: finalCompanyId,
-        usable: formData.usable || 1, // S'assurer que usable est un nombre
       });
       
       // Récupérer l'ID du produit créé
@@ -711,22 +709,35 @@ const handleChange = (
               </div>
 
               <div>
-                <label htmlFor="dayOfWeek" className="block text-sm font-medium text-gray-900 mb-2">Jour de la semaine <span className="text-[#D73738]">*</span></label>
-                <select
-                  id="dayOfWeek"
-                  name="dayOfWeek"
-                  value={promoData.dayOfWeek}
-                  onChange={handlePromoChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:border-[#D73738] focus:ring-4 focus:ring-red-200 transition cursor-pointer"
-                >
-                  <option value="">Sélectionner un jour</option>
-                  {daysOfWeek.map((day) => (
-                    <option key={day.value} value={day.value}>
-                      {day.label}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Jours de la semaine <span className="text-[#D73738]">*</span>
+                </label>
+                
+                {/* Zone de sélection multi-boutons */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {daysOfWeek.map((day) => {
+                    const isSelected = promoData.dayOfWeek.includes(day.value);
+                    return (
+                      <button
+                        key={day.value}
+                        type="button"
+                        onClick={() => toggleDay(day.value)}
+                        className={`px-3 py-2 text-sm rounded-md border transition-colors ${
+                          isSelected
+                            ? 'bg-[#D73738] text-white border-[#D73738] shadow-sm'
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {day.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Affichage intelligent (ex: "Semaine, Week-end") */}
+                <div className="text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded border border-gray-200">
+                  Sélection : <span className="font-medium text-gray-900">{getSelectedDaysLabel()}</span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
